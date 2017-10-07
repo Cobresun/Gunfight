@@ -8,6 +8,7 @@ import pygame
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 BLOCK_SIZE = 40
+BULLET_SIZE = 5
 CHARACTER_SPEED = 10
 BULLET_SPEED = 10
 FPS = 60
@@ -17,6 +18,7 @@ WHITE = (250, 250, 250)
 BLACK = (0, 0, 0)
 RED = (250, 0, 0)
 GREEN = (0, 250, 0)
+BLUE = (0, 0, 250)
 
 #Initialize Everything 
 pygame.init()
@@ -64,7 +66,12 @@ class Bullet(pygame.sprite.Sprite):
 		self.y = start_y
 		self.velocity = 0
 		self.facing_direction = direction
+		self.size = BULLET_SIZE
+		self.colour = BLUE
+		self.direction = direction
+		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 		bullets.append(self)
+		allObjects.append(self)
 
 	def fire(self):
 		self.velocity = BULLET_SPEED
@@ -76,6 +83,13 @@ class Bullet(pygame.sprite.Sprite):
 			self.x += self.velocity
 		elif self.direction == Direction.LEFT:
 			self.x -= self.velocity
+
+	def draw(self):
+		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
+		pygame.draw.rect(gameDisplay, self.colour, [self.x, self.y, self.size, self.size])
+
+	def is_collided_with(self, other):
+		return self.rect.colliderect(other.rect)
 
 
 class Character(pygame.sprite.Sprite):
@@ -153,7 +167,8 @@ class Character(pygame.sprite.Sprite):
 				self.y = other.y - self.radius*2
 
 	def shoot(self):
-		pass
+		bullet = Bullet(self.x, self.y, self.facing_direction)
+		bullet.fire()
 
 	def draw(self):
 		if self.velocity != 0:
@@ -228,8 +243,6 @@ def main():
 					player.stopWalk()
 
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				mouse_pos = pygame.mouse.get_pos()
-				player.orient( mouse_pos[0], mouse_pos[1] )
 				player.shoot()
 
 		#Orient player direction
@@ -238,13 +251,21 @@ def main():
 
 		#Clear Screen
 		gameDisplay.fill(WHITE)
-
+		print (len(bullets))
 		#Wall Collision Detection
 		for wall in walls:
 		 	player.is_collided_with(wall)
 		 	for enemy in enemies:
 		 		enemy.is_collided_with(wall)
+	 		for bullet in bullets:
+	 			if bullet.is_collided_with(wall):
+	 				bullets.remove(bullet)
+	 				del bullet
+
 		
+		for bullet in bullets:
+		 	bullet.fire()
+
 		#Draw every object
 		for item in allObjects:	
 			item.draw()
