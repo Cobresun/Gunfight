@@ -1,3 +1,4 @@
+
 import os, sys
 from enum import Enum
 import pygame
@@ -14,8 +15,9 @@ RED = (250, 0, 0)
 #Create The Backgound
 gameDisplay = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
-#Object container for everyting to be drawn
+#Object containers
 allObjects = []
+walls = []
 
 #Enumerator for directions
 class Direction(Enum):
@@ -29,9 +31,10 @@ class Character(pygame.sprite.Sprite):
 	def __init__(self, start_x, start_y):
 		self.x = start_x
 		self.y = start_y
-		self.radius = 20
+		self.radius = 10
 		self.velocity = 0
 		self.facing_direction = Direction.LEFT
+		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
 		allObjects.append(self)
 
 	def walk(self, direction):
@@ -49,10 +52,26 @@ class Character(pygame.sprite.Sprite):
 	def stopWalk(self):
 		self.velocity = 0
 
+	def is_collided_with(self, other):
+		if self.rect.colliderect(other.rect):
+			if self.facing_direction == Direction.LEFT:
+				self.stopWalk()
+				self.x = other.x + other.size + self.radius + 1
+			if self.facing_direction == Direction.RIGHT:
+				self.stopWalk()
+				self.x = other.x - self.radius - 1
+			if self.facing_direction == Direction.UP:
+				self.stopWalk()
+				self.y = other.y + other.size + self.radius + 1
+			if self.facing_direction == Direction.DOWN:
+				self.stopWalk()
+				self.y = other.y - self.radius - 1
+
 	def draw(self):
 		if self.velocity != 0:
 			self.walk(self.facing_direction)
 		pygame.draw.circle(gameDisplay, self.colour, (self.x, self.y), self.radius)
+		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
 
 
 class Player(Character):
@@ -67,6 +86,20 @@ class Enemy(Character):
 		self.colour = RED
 
 
+class Wall(pygame.sprite.Sprite):
+	def __init__(self, start_x, start_y):
+		self.x = start_x
+		self.y = start_y
+		self.size = 40
+		self.colour = BLACK
+		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
+		allObjects.append(self)
+		walls.append(self)
+
+	def draw(self):
+		pygame.draw.rect(gameDisplay, self.colour, [self.x, self.y, self.size, self.size])
+
+#Main Game 
 def main():
 	#Initialize Everything 
 	pygame.init()
@@ -80,7 +113,7 @@ def main():
 	#Prepare Game Objects
 	player = Player(100, 100)
 	enemy_1 = Enemy(200, 200)
-	allObjects.append(player)
+	wall_1 = Wall(300, 300)
 
 	#Main Loop
 	while 1:
@@ -109,8 +142,11 @@ def main():
 
 		#Update Views
 		gameDisplay.fill(WHITE)
+
+		for wall in walls:
+		 	player.is_collided_with(wall)
 		
-		for item in allObjects:
+		for item in allObjects:	
 			item.draw()
 
 		pygame.display.update()
