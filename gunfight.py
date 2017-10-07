@@ -1,5 +1,6 @@
 
 import os, sys
+import math
 from enum import Enum
 import pygame
 
@@ -83,7 +84,7 @@ class Character(pygame.sprite.Sprite):
 		self.y = start_y + BLOCK_SIZE/2
 		self.radius = 10
 		self.velocity = 0
-		self.facing_direction = Direction.LEFT
+		self.facing_direction = Direction.RIGHT
 		self.moving_direction = Direction.LEFT
 		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
 		allObjects.append(self)
@@ -100,16 +101,38 @@ class Character(pygame.sprite.Sprite):
 		elif direction == Direction.LEFT:
 			self.x -= self.velocity
 
-	def orient(self, mpos_x, mpos_y):
-		if self.x > mpos_x:
-			self.facing_direction = Direction.LEFT
-		elif self.x < mpos_x:
-			self.facing_direction = Direction.RIGHT
-		elif self.y > mpos_y:
-			self.facing_direction = Direction.DOWN
-		elif self.y < mpos_y:
-			self.facing_direction = Direction.UP
-		print(self.facing_direction)
+	def orient(self, pos_x, pos_y):
+		if self.x > pos_x:
+			if self.y > pos_y:
+				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
+				if theta > 45:
+					self.facing_direction = Direction.UP
+				else:
+					self.facing_direction = Direction.LEFT
+
+		if self.x > pos_x:
+			if self.y < pos_y:
+				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
+				if theta > 45:
+					self.facing_direction = Direction.LEFT
+				else:
+					self.facing_direction = Direction.DOWN
+
+		if self.x < pos_x:
+			if self.y < pos_y:
+				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
+				if theta > 45:
+					self.facing_direction = Direction.DOWN
+				else:
+					self.facing_direction = Direction.RIGHT
+
+		if self.x < pos_x:
+			if self.y > pos_y:
+				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
+				if theta > 45:
+					self.facing_direction = Direction.RIGHT
+				else:
+					self.facing_direction = Direction.UP		
 
 	def stopWalk(self):
 		self.velocity = 0
