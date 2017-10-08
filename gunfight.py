@@ -152,14 +152,13 @@ class Bullet(pygame.sprite.Sprite):
 
 class Character(pygame.sprite.Sprite):
 	def __init__(self, start_x, start_y, facing_direction):
-		self.x = start_x
-		self.y = start_y
+		#self.x = start_x
+		#self.y = start_y
 		self.size = CHARACTER_SIZE
 		self.velocity = 0
 		self.facing_direction = facing_direction
-		#self.moving_direction = Direction.LEFT
-		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
-		self.radar = Radar(self.x, self.y, self.size/2, self.facing_direction)
+		self.rect = pygame.Rect(start_x, start_y, self.size, self.size)
+		self.radar = Radar(start_x, start_y, self.size/2, self.facing_direction)
 		allObjects.append(self)
 		allCharacters.append(self)
 
@@ -192,73 +191,65 @@ class Character(pygame.sprite.Sprite):
 
 	def orient(self, pos_x, pos_y):
 		#TODO: Left/Right facing is really hard to achieve, make it easier
-		if self.x > pos_x:
-			if self.y == pos_y:
+		if self.rect.x > pos_x:
+			if self.rect.y == pos_y:
 				self.facing_direction = Direction.LEFT
-			if self.y > pos_y:
-				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
+			if self.rect.y > pos_y:
+				theta = math.degrees( math.atan( (self.rect.y - pos_y) / (self.rect.x - pos_x) ) )
 				if theta > 45:
 					self.facing_direction = Direction.UP
 				else:
 					self.facing_direction = Direction.LEFT
 
-		if self.x > pos_x:
-			if self.y == pos_y:
+		if self.rect.x > pos_x:
+			if self.rect.y == pos_y:
 				self.facing_direction = Direction.LEFT
-			if self.y < pos_y:
-				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
+			if self.rect.y < pos_y:
+				theta = math.degrees( math.atan( (self.rect.y - pos_y) / (self.rect.x - pos_x) ) )
 				if theta > 45:
 					self.facing_direction = Direction.LEFT
 				else:
 					self.facing_direction = Direction.DOWN
 
-		if self.x < pos_x:
-			if self.y == pos_y:
+		if self.rect.x < pos_x:
+			if self.rect.y == pos_y:
 				self.facing_direction == Direction.RIGHT
-			if self.y < pos_y:
-				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
+			if self.rect.y < pos_y:
+				theta = math.degrees( math.atan( (self.rect.y - pos_y) / (self.rect.x - pos_x) ) )
 				if theta > 45:
 					self.facing_direction = Direction.DOWN
 				else:
 					self.facing_direction = Direction.RIGHT
 
-		if self.x < pos_x:
-			if self.y == pos_y:
+		if self.rect.x < pos_x:
+			if self.rect.y == pos_y:
 				self.facing_direction = Direction.RIGHT
-			if self.y > pos_y:
-				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
+			if self.rect.y > pos_y:
+				theta = math.degrees( math.atan( (self.rect.y - pos_y) / (self.rect.x - pos_x) ) )
 				if theta > 45:
 					self.facing_direction = Direction.RIGHT
 				else:
 					self.facing_direction = Direction.UP		
 
-	def stopWalk(self):
-		self.velocity = 0
-
 	def shoot(self):
 		#TODO: Countdown timer for gun
 		if self.facing_direction == Direction.LEFT:
-			bullet_params = (self.x - self.size*2, self.y, self.facing_direction)
+			bullet_params = (self.rect.x, self.rect.y + self.size/2, self.facing_direction)
 		elif self.facing_direction == Direction.RIGHT:
-			bullet_params = (self.x + self.size*2 , self.y, self.facing_direction)
+			bullet_params = (self.rect.x + self.size, self.rect.y + self.size/2, self.facing_direction)
 		elif self.facing_direction == Direction.UP:
-			bullet_params = (self.x , self.y - self.size*2, self.facing_direction)
+			bullet_params = (self.rect.x + self.size/2 , self.rect.y, self.facing_direction)
 		elif self.facing_direction == Direction.DOWN:
-			bullet_params = (self.x , self.y + self.size*2, self.facing_direction)
+			bullet_params = (self.rect.x + self.size/2 , self.rect.y + self.size, self.facing_direction)
 
 		bullet = Bullet(bullet_params[0], bullet_params[1], bullet_params[2])
 		bullet.fire()
 
 	def draw(self):
-		#If the player still has their finger on the key then the player keeps moving
-		# if self.velocity != 0:
-		# 	self.walk(self.moving_direction)
-
 		#Remaking radar for new location
 		radars.remove(self.radar)
 		del self.radar
-		#self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
-		self.radar = Radar(self.x, self.y, self.size, self.facing_direction)
+		self.radar = Radar(self.rect.x, self.rect.y, self.size, self.facing_direction)
 		self.radar.draw()
 
 		#Draw character
