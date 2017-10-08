@@ -9,8 +9,12 @@ DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 BLOCK_SIZE = 40
 BULLET_SIZE = 5
+RADAR_WIDTH = 5
+RADAR_LENGTH = 3 * BLOCK_SIZE
+
 CHARACTER_SPEED = 10
 BULLET_SPEED = 20
+
 FPS = 60
 
 #Colours
@@ -19,6 +23,7 @@ BLACK = (0, 0, 0)
 RED = (250, 0, 0)
 GREEN = (0, 250, 0)
 BLUE = (0, 0, 250)
+SILVER = (192, 192, 192)
 
 #Initialize Everything 
 pygame.init()
@@ -35,22 +40,23 @@ walls = []
 enemies = []
 bullets = []
 allCharacters = []
+radars = []
 
 #Map
 game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-	   		[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1],
-	   		[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	   		[1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
-	   		[1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	   		[1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
-	   		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
-	   		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
-	   		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	   		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	   		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	   		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	   		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	   		[1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1],
+	   		[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1],
+	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
+	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1], 
+	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1], 
+	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+	   		[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	   		[1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 #Enumerator for directions
@@ -61,6 +67,26 @@ class Direction(Enum):
 	DOWN = 4
 
 #Classes for our game objects
+class Radar(pygame.sprite.Sprite):
+	def __init__(self, start_x, start_y, radius, direction):
+		self.x = start_x
+		self.y = start_y
+		self.radius = radius
+		self.facing_direction = direction
+		radars.append(self)
+
+	def draw(self):
+		#TODO: have radar cut off by walls
+		if self.facing_direction == Direction.RIGHT:
+			pygame.draw.rect(gameDisplay, RED, (self.x + self.radius, self.y, RADAR_LENGTH, RADAR_WIDTH))
+		elif self.facing_direction == Direction.LEFT:
+			pygame.draw.rect(gameDisplay, RED, (self.x - self.radius - RADAR_LENGTH, self.y, RADAR_LENGTH, RADAR_WIDTH))
+		elif self.facing_direction == Direction.UP:
+			pygame.draw.rect(gameDisplay, RED, (self.x, self.y - self.radius - RADAR_LENGTH, RADAR_WIDTH, RADAR_LENGTH))
+		elif self.facing_direction == Direction.DOWN:
+			pygame.draw.rect(gameDisplay, RED, (self.x, self.y + self.radius, RADAR_WIDTH, RADAR_LENGTH))
+
+
 class Bullet(pygame.sprite.Sprite):
 	def __init__(self, start_x, start_y, direction):
 		self.x = start_x
@@ -102,6 +128,7 @@ class Character(pygame.sprite.Sprite):
 		self.facing_direction = Direction.RIGHT
 		self.moving_direction = Direction.LEFT
 		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
+		self.radar = Radar(self.x, self.y, self.radius, self.facing_direction)
 		allObjects.append(self)
 		allCharacters.append(self)
 
@@ -182,10 +209,19 @@ class Character(pygame.sprite.Sprite):
 		bullet.fire()
 
 	def draw(self):
+		#If the player still has their finger on the key then the player keeps moving
 		if self.velocity != 0:
 			self.walk(self.moving_direction)
-		pygame.draw.circle(gameDisplay, self.colour, (int(self.x), int(self.y)), self.radius)
+
+		radars.remove(self.radar)
+		del self.radar
+
 		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
+		self.radar = Radar(self.x, self.y, self.radius, self.facing_direction)
+		self.radar.draw()
+		
+
+		pygame.draw.circle(gameDisplay, self.colour, (int(self.x), int(self.y)), self.radius)
 
 
 class Player(Character):
@@ -200,11 +236,13 @@ class Player(Character):
 class Enemy(Character):
 	def __init__(self, start_x, start_y, facing_direction):
 		Character.__init__(self, start_x, start_y, facing_direction)
-		self.colour = RED
+		self.colour = SILVER
 		enemies.append(self)
 
 	def die(self):
 		print("You hit!")
+		radars.remove(self.radar)
+		del self.radar
 		enemies.remove(self)
 		allObjects.remove(self)
 		del self
