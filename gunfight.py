@@ -119,6 +119,7 @@ class Radar(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
+	#TODO: Follow character class and remove self.x make into self.rect.x
 	def __init__(self, start_x, start_y, direction):
 		self.x = start_x
 		self.y = start_y
@@ -146,14 +147,17 @@ class Bullet(pygame.sprite.Sprite):
 		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 		pygame.draw.rect(gameDisplay, self.colour, [self.x, self.y, self.size, self.size])
 
+	def destroy(self):
+		bullets.remove(self)
+		allObjects.remove(self)
+		del self
+
 	def is_collided_with(self, other):
 		return self.rect.colliderect(other.rect)
 
 
 class Character(pygame.sprite.Sprite):
 	def __init__(self, start_x, start_y, facing_direction):
-		#self.x = start_x
-		#self.y = start_y
 		self.size = CHARACTER_SIZE
 		self.velocity = 0
 		self.facing_direction = facing_direction
@@ -283,11 +287,11 @@ class Enemy(Character):
 		del self.radar
 		enemies.remove(self)
 		allObjects.remove(self)
-		del self		
+		del self
 
 	def listen(self, pos_x, pos_y):
-		distance_x = math.fabs(self.x - pos_x)
-		distance_y = math.fabs(self.y - pos_y)
+		distance_x = math.fabs(self.rect.x - pos_x)
+		distance_y = math.fabs(self.rect.y - pos_y)
 		displacement = math.sqrt((distance_x**2) + (distance_y**2))
 		if displacement < HEARING_RANGE:
 			self.triggered = True
@@ -296,29 +300,29 @@ class Enemy(Character):
 
 	def follow(self):
 		#TODO: Stay triggered until the enemy reaches the target location
-		if (self.target_x - 5) <= self.x <= (self.target_x + 5) and (self.target_y - 5) <= self.y <= (self.target_y + 5):
+		if (self.target_x - 5) <= self.rect.x <= (self.target_x + 5) and (self.target_y - 5) <= self.rect.y <= (self.target_y + 5):
 			self.triggered = False
 		else:
 			self.orient(self.target_x, self.target_y)
 			if not self.radar.blocked:
 				self.walk(self.facing_direction)
 				return
-			if self.x > self.target_x:
+			if self.rect.x > self.target_x:
 				self.facing_direction = Direction.LEFT
 				if not self.radar.blocked:
 					self.walk(self.facing_direction)
 					return
-			if self.x < self.target_x:
+			if self.rect.x < self.target_x:
 				self.facing_direction = Direction.RIGHT
 				if not self.radar.blocked:
 					self.walk(self.facing_direction)
 					return
-			if self.y < self.target_y:
+			if self.rect.y < self.target_y:
 				self.facing_direction = Direction.DOWN
 				if not self.radar.blocked:
 					self.walk(self.facing_direction)
 					return
-			if self.y > self.target_y:
+			if self.rect.y > self.target_y:
 				self.facing_direction = Direction.UP
 				if not self.radar.blocked:
 					self.walk(self.facing_direction)
@@ -371,6 +375,8 @@ def main():
 				return
 			if e.type == pygame.MOUSEBUTTONDOWN:
 				player.shoot()
+				for enemy in enemies:
+					enemy.listen( player.rect.x, player.rect.y )
 		
 		# Move the player if an arrow key is pressed
 		key = pygame.key.get_pressed()
@@ -398,19 +404,17 @@ def main():
 		for wall in walls:
 			for bullet in bullets:
 				if bullet.is_collided_with(wall):
-					bullets.remove(bullet)
-					allObjects.remove(bullet)
-					del bullet
+					bullet.destroy()
 
 		#Check if any bullets hit a character
 		for character in allCharacters:
 			for bullet in bullets:
 				if bullet.is_collided_with(character):
 					character.die()
+					bullet.destroy()
 
 		if player.check_if_hit():
-			#return
-			pass
+			print ("You've been hit!")
 
 		#Enemy following
 		for enemy in enemies:
@@ -419,8 +423,7 @@ def main():
 
 		#Check if all enemies are dead
 		if len(enemies) == 0:
-			pass
-			#return
+			print ("You win!")
 
 		#Draw every object
 		for item in allObjects:	
