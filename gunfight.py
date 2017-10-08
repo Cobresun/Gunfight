@@ -1,4 +1,4 @@
-
+#!usr/bin/env python
 import os, sys
 import math
 from enum import Enum
@@ -123,7 +123,6 @@ class Radar(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
-	#TODO: Follow character class and remove self.x make into self.rect.x
 	def __init__(self, start_x, start_y, direction):
 		self.velocity = 0
 		self.facing_direction = direction
@@ -195,43 +194,42 @@ class Character(pygame.sprite.Sprite):
 					self.rect.top = wall.rect.bottom
 
 	def orient(self, pos_x, pos_y):
-		#TODO: Left/Right facing is really hard to achieve, make it easier
-		if self.rect.x > pos_x:
-			if self.rect.y == pos_y:
+		if self.rect.x + self.size/2 > pos_x:
+			if self.rect.y + self.size/2 == pos_y:
 				self.facing_direction = Direction.LEFT
-			if self.rect.y > pos_y:
-				theta = math.degrees( math.atan( (self.rect.y - pos_y) / (self.rect.x - pos_x) ) )
+			if self.rect.y + self.size/2 > pos_y:
+				theta = math.degrees( math.atan( (self.rect.y + self.size/2 - pos_y) / (self.rect.x + self.size/2 - pos_x) ) )
 				if theta > 45:
 					self.facing_direction = Direction.UP
 				else:
 					self.facing_direction = Direction.LEFT
 
-		if self.rect.x > pos_x:
-			if self.rect.y == pos_y:
+		if self.rect.x + self.size/2 > pos_x:
+			if self.rect.y + self.size/2 == pos_y:
 				self.facing_direction = Direction.LEFT
-			if self.rect.y < pos_y:
-				theta = math.degrees( math.atan( (self.rect.y - pos_y) / (self.rect.x - pos_x) ) )
-				if theta > 45:
+			if self.rect.y + self.size/2 < pos_y:
+				theta = math.degrees( math.atan( (self.rect.y + self.size/2 - pos_y) / (self.rect.x + self.size/2 - pos_x) ) )
+				if theta > -45:
 					self.facing_direction = Direction.LEFT
 				else:
 					self.facing_direction = Direction.DOWN
 
-		if self.rect.x < pos_x:
-			if self.rect.y == pos_y:
+		if self.rect.x + self.size/2 < pos_x:
+			if self.rect.y + self.size/2 == pos_y:
 				self.facing_direction == Direction.RIGHT
-			if self.rect.y < pos_y:
-				theta = math.degrees( math.atan( (self.rect.y - pos_y) / (self.rect.x - pos_x) ) )
+			if self.rect.y + self.size/2 < pos_y:
+				theta = math.degrees( math.atan( (self.rect.y + self.size/2 - pos_y) / (self.rect.x + self.size/2 - pos_x) ) )
 				if theta > 45:
 					self.facing_direction = Direction.DOWN
 				else:
 					self.facing_direction = Direction.RIGHT
 
-		if self.rect.x < pos_x:
-			if self.rect.y == pos_y:
+		if self.rect.x + self.size/2 < pos_x:
+			if self.rect.y + self.size/2 == pos_y:
 				self.facing_direction = Direction.RIGHT
-			if self.rect.y > pos_y:
-				theta = math.degrees( math.atan( (self.rect.y - pos_y) / (self.rect.x - pos_x) ) )
-				if theta > 45:
+			if self.rect.y + self.size/2 > pos_y:
+				theta = math.degrees( math.atan( (self.rect.y + self.size/2 - pos_y) / (self.rect.x + self.size/2 - pos_x) ) )
+				if theta > -45 :
 					self.facing_direction = Direction.RIGHT
 				else:
 					self.facing_direction = Direction.UP		
