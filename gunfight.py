@@ -11,6 +11,7 @@ BLOCK_SIZE = 40
 BULLET_SIZE = 5
 RADAR_WIDTH = 5
 RADAR_LENGTH = 3 * BLOCK_SIZE
+HEARING_RANGE = 9 * BLOCK_SIZE
 
 CHARACTER_SPEED = 10
 BULLET_SPEED = 20
@@ -48,7 +49,7 @@ game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1], 
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1], 
+	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1], 
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 	   		[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -56,7 +57,7 @@ game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	   		[1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 #Enumerator for directions
@@ -125,7 +126,7 @@ class Character(pygame.sprite.Sprite):
 		self.y = start_y + BLOCK_SIZE/2
 		self.radius = 10
 		self.velocity = 0
-		self.facing_direction = Direction.RIGHT
+		self.facing_direction = facing_direction
 		self.moving_direction = Direction.LEFT
 		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
 		self.radar = Radar(self.x, self.y, self.radius, self.facing_direction)
@@ -145,6 +146,7 @@ class Character(pygame.sprite.Sprite):
 			self.x -= self.velocity
 
 	def orient(self, pos_x, pos_y):
+		#TODO: Left/Right facing is really hard to achieve, make it easier
 		if self.x > pos_x:
 			if self.y > pos_y:
 				theta = math.degrees( math.atan( (self.y - pos_y) / (self.x - pos_x) ) )
@@ -196,6 +198,7 @@ class Character(pygame.sprite.Sprite):
 				self.y = other.y - self.radius*2
 
 	def shoot(self):
+		#TODO: Countdown timer for gun
 		if self.facing_direction == Direction.LEFT:
 			bullet_params = (self.x - self.radius*2, self.y, self.facing_direction)
 		elif self.facing_direction == Direction.RIGHT:
@@ -213,14 +216,14 @@ class Character(pygame.sprite.Sprite):
 		if self.velocity != 0:
 			self.walk(self.moving_direction)
 
+		#Remake radar for new location
 		radars.remove(self.radar)
 		del self.radar
-
 		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
 		self.radar = Radar(self.x, self.y, self.radius, self.facing_direction)
 		self.radar.draw()
-		
 
+		#Draw character
 		pygame.draw.circle(gameDisplay, self.colour, (int(self.x), int(self.y)), self.radius)
 
 
@@ -237,10 +240,10 @@ class Enemy(Character):
 	def __init__(self, start_x, start_y, facing_direction):
 		Character.__init__(self, start_x, start_y, facing_direction)
 		self.colour = SILVER
+		self.triggered = False
 		enemies.append(self)
 
 	def die(self):
-		print("You hit!")
 		radars.remove(self.radar)
 		del self.radar
 		enemies.remove(self)
@@ -248,7 +251,18 @@ class Enemy(Character):
 		del self
 
 	def listen(self, pos_x, pos_y):
-		pass
+		distance_x = math.fabs(self.x - pos_x)
+		distance_y = math.fabs(self.y - pos_y)
+		displacement = math.sqrt((distance_x**2) + (distance_y**2))
+		if displacement < HEARING_RANGE:
+			self.triggered = True
+			self.target_x = pos_x
+			self.target_y = pos_y
+
+	def follow(self):
+		#TODO: Stay triggered until the enemy reaches the target location
+		print("Following!")
+		self.triggered = False
 
 
 class Wall(pygame.sprite.Sprite):
@@ -278,6 +292,12 @@ def main():
 				player = Player( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
 			if item == 3:
 				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
+			if item == 4:
+				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.RIGHT )
+			if item == 5:
+				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.UP )
+			if item == 6:
+				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.DOWN )
 
 	#Main Loop
 	while True:
@@ -304,7 +324,10 @@ def main():
 					player.stopWalk()
 
 			if event.type == pygame.MOUSEBUTTONDOWN:
+				mouse_pos = pygame.mouse.get_pos()
 				player.shoot()
+				for enemy in enemies:
+ 					enemy.listen( player.x, player.y )
 
 		#Orient player direction
 		mouse_pos = pygame.mouse.get_pos()
@@ -334,9 +357,18 @@ def main():
 				if bullet.is_collided_with(character):
 			 		character.die()
 
+ 		#Enemy following
+		for enemy in enemies:
+ 			if enemy.triggered:
+ 				enemy.follow()
+
 		#Draw every object
 		for item in allObjects:	
 			item.draw()
+
+		#Check if all enemies are dead
+		if len(enemies) == 0:
+			return
 
 		pygame.display.update()
 
