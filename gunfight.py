@@ -7,8 +7,8 @@ import pygame
 #Constants
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
-CHARACTER_SIZE = 40
 BLOCK_SIZE = 40
+CHARACTER_SIZE = BLOCK_SIZE
 BULLET_SIZE = 5
 RADAR_WIDTH = 5
 RADAR_LENGTH = 3 * BLOCK_SIZE
@@ -46,20 +46,20 @@ radars = []
 
 #Map
 game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-	   		[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1],
-	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
-	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 4, 0, 1, 1, 1], 
-	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1], 
-	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-	   		[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+			[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1],
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 4, 0, 1, 1, 1], 
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 #Enumerator for directions
 class Direction(Enum):
@@ -157,39 +157,38 @@ class Character(pygame.sprite.Sprite):
 		self.size = CHARACTER_SIZE
 		self.velocity = 0
 		self.facing_direction = facing_direction
-		self.moving_direction = Direction.LEFT
+		#self.moving_direction = Direction.LEFT
 		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 		self.radar = Radar(self.x, self.y, self.size/2, self.facing_direction)
 		allObjects.append(self)
 		allCharacters.append(self)
 
 	def walk(self, direction):
-		self.velocity = CHARACTER_SPEED
-		self.moving_direction = direction
+		if direction == Direction.LEFT:
+			self.move_single_axis(- CHARACTER_SPEED, 0)
+		if direction == Direction.RIGHT:
+			self.move_single_axis(CHARACTER_SPEED, 0)
 		if direction == Direction.UP:
-			self.y -= self.velocity
-			self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
-			for wall in walls:
-				if self.is_collided_with(wall):
-					self.y += self.velocity
-		elif direction == Direction.DOWN:
-			self.y += self.velocity
-			self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
-			for wall in walls:
-				if self.is_collided_with(wall):
-					self.y -= self.velocity
-		elif direction == Direction.RIGHT:
-			self.x += self.velocity
-			self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
-			for wall in walls:
-				if self.is_collided_with(wall):
-					self.x -= self.velocity
-		elif direction == Direction.LEFT:
-			self.x -= self.velocity
-			self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
-			for wall in walls:
-				if self.is_collided_with(wall):
-					self.x += self.velocity
+			self.move_single_axis(0, - CHARACTER_SPEED)
+		if direction == Direction.DOWN:
+			self.move_single_axis(0, CHARACTER_SPEED)
+
+	def move_single_axis(self, dx, dy):
+		# Move the rect
+		self.rect.x += dx
+		self.rect.y += dy
+
+		#If you collide with a wall, move out based on velocity
+		for wall in walls:
+			if self.rect.colliderect(wall.rect):
+				if dx > 0: # Moving right; Hit the left side of the wall
+					self.rect.right = wall.rect.left
+				if dx < 0: # Moving left; Hit the right side of the wall
+					self.rect.left = wall.rect.right
+				if dy > 0: # Moving down; Hit the top side of the wall
+					self.rect.bottom = wall.rect.top
+				if dy < 0: # Moving up; Hit the bottom side of the wall
+					self.rect.top = wall.rect.bottom
 
 	def orient(self, pos_x, pos_y):
 		#TODO: Left/Right facing is really hard to achieve, make it easier
@@ -236,25 +235,6 @@ class Character(pygame.sprite.Sprite):
 	def stopWalk(self):
 		self.velocity = 0
 
-	def is_collided_with(self, other):
-		if self.rect.colliderect(other.rect):
-			if self.moving_direction == Direction.LEFT:
-				self.stopWalk()
-				# self.x = other.x + other.size + self.radius*2
-				self.rect.left = other.rect.right
-			if self.moving_direction == Direction.RIGHT:
-				self.stopWalk()
-				# self.x = other.x - self.radius*2
-				self.rect.right = other.rect.left
-			if self.moving_direction == Direction.UP:
-				self.stopWalk()
-				# self.y = other.y + other.size + self.radius*2
-				self.rect.top = other.rect.bottom
-			if self.moving_direction == Direction.DOWN:
-				self.stopWalk()
-				# self.y = other.y - self.radius*2
-				self.rect.bottom = other.rect.top
-
 	def shoot(self):
 		#TODO: Countdown timer for gun
 		if self.facing_direction == Direction.LEFT:
@@ -271,13 +251,13 @@ class Character(pygame.sprite.Sprite):
 
 	def draw(self):
 		#If the player still has their finger on the key then the player keeps moving
-		if self.velocity != 0:
-			self.walk(self.moving_direction)
+		# if self.velocity != 0:
+		# 	self.walk(self.moving_direction)
 
 		#Remaking radar for new location
 		radars.remove(self.radar)
 		del self.radar
-		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
+		#self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 		self.radar = Radar(self.x, self.y, self.size, self.facing_direction)
 		self.radar.draw()
 
@@ -393,30 +373,24 @@ def main():
 		clock.tick(FPS)
 
 		#Controller
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
+		for e in pygame.event.get():
+			if e.type == pygame.QUIT:
 				return
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:
-					return
-				elif event.key == pygame.K_a:
-					player.walk(Direction.LEFT)
-				elif event.key == pygame.K_d:
-					player.walk(Direction.RIGHT)
-				elif event.key == pygame.K_w:
-					player.walk(Direction.UP)
-				elif event.key == pygame.K_s:
-					player.walk(Direction.DOWN)
-
-			if event.type == pygame.KEYUP:
-				if event.key == pygame.K_a or event.key == pygame.K_d or event.key == pygame.K_w or event.key == pygame.K_s:
-					player.stopWalk()
-
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				mouse_pos = pygame.mouse.get_pos()
+			if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+				return
+			if e.type == pygame.MOUSEBUTTONDOWN:
 				player.shoot()
-				for enemy in enemies:
- 					enemy.listen( player.x, player.y )
+		
+		# Move the player if an arrow key is pressed
+		key = pygame.key.get_pressed()
+		if key[pygame.K_a]:
+			player.walk(Direction.LEFT)
+		if key[pygame.K_d]:
+			player.walk(Direction.RIGHT)
+		if key[pygame.K_w]:
+			player.walk(Direction.UP)
+		if key[pygame.K_s]:
+			player.walk(Direction.DOWN)
 
 		#Clear Screen
 		gameDisplay.fill(WHITE)
@@ -427,33 +401,30 @@ def main():
 
 		#Fire bullets
 		for bullet in bullets:
-		 	bullet.fire()
+			bullet.fire()
 
 		#Wall Collision Detection
 		for wall in walls:
-		 	player.is_collided_with(wall)
-		 	for enemy in enemies:
-		 		enemy.is_collided_with(wall)
-	 		for bullet in bullets:
-	 			if bullet.is_collided_with(wall):
-	 				bullets.remove(bullet)
-	 				allObjects.remove(bullet)
-	 				del bullet
+			for bullet in bullets:
+				if bullet.is_collided_with(wall):
+					bullets.remove(bullet)
+					allObjects.remove(bullet)
+					del bullet
 
-	 	#Check if any bullets hit a character
+		#Check if any bullets hit a character
 		for character in allCharacters:
 			for bullet in bullets:
 				if bullet.is_collided_with(character):
-			 		character.die()
+					character.die()
 
 		if player.check_if_hit():
 			#return
 			pass
 
- 		#Enemy following
+		#Enemy following
 		for enemy in enemies:
- 			if enemy.triggered:
- 				enemy.follow()
+			if enemy.triggered:
+				enemy.follow()
 
 		#Check if all enemies are dead
 		if len(enemies) == 0:
