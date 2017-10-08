@@ -10,7 +10,7 @@ DISPLAY_HEIGHT = 600
 BLOCK_SIZE = 40
 BULLET_SIZE = 5
 CHARACTER_SPEED = 10
-BULLET_SPEED = 10
+BULLET_SPEED = 20
 FPS = 60
 
 #Colours
@@ -34,6 +34,7 @@ allObjects = []
 walls = []
 enemies = []
 bullets = []
+allCharacters = []
 
 #Map
 game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
@@ -93,7 +94,7 @@ class Bullet(pygame.sprite.Sprite):
 
 
 class Character(pygame.sprite.Sprite):
-	def __init__(self, start_x, start_y):
+	def __init__(self, start_x, start_y, facing_direction):
 		self.x = start_x + BLOCK_SIZE/2
 		self.y = start_y + BLOCK_SIZE/2
 		self.radius = 10
@@ -102,6 +103,7 @@ class Character(pygame.sprite.Sprite):
 		self.moving_direction = Direction.LEFT
 		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
 		allObjects.append(self)
+		allCharacters.append(self)
 
 	def walk(self, direction):
 		self.velocity = CHARACTER_SPEED
@@ -167,7 +169,16 @@ class Character(pygame.sprite.Sprite):
 				self.y = other.y - self.radius*2
 
 	def shoot(self):
-		bullet = Bullet(self.x, self.y, self.facing_direction)
+		if self.facing_direction == Direction.LEFT:
+			bullet_params = (self.x - self.radius*2, self.y, self.facing_direction)
+		elif self.facing_direction == Direction.RIGHT:
+			bullet_params = (self.x + self.radius*2 , self.y, self.facing_direction)
+		elif self.facing_direction == Direction.UP:
+			bullet_params = (self.x , self.y - self.radius*2, self.facing_direction)
+		elif self.facing_direction == Direction.DOWN:
+			bullet_params = (self.x , self.y + self.radius*2, self.facing_direction)
+
+		bullet = Bullet(bullet_params[0], bullet_params[1], bullet_params[2])
 		bullet.fire()
 
 	def draw(self):
@@ -178,16 +189,28 @@ class Character(pygame.sprite.Sprite):
 
 
 class Player(Character):
-	def __init__(self, start_x, start_y):
-		Character.__init__(self, start_x, start_y)
+	def __init__(self, start_x, start_y, facing_direction):
+		Character.__init__(self, start_x, start_y, facing_direction)
 		self.colour = GREEN
+
+	def die(self):
+		print("You died!")
 
 
 class Enemy(Character):
-	def __init__(self, start_x, start_y):
-		Character.__init__(self, start_x, start_y)
+	def __init__(self, start_x, start_y, facing_direction):
+		Character.__init__(self, start_x, start_y, facing_direction)
 		self.colour = RED
 		enemies.append(self)
+
+	def die(self):
+		print("You hit!")
+		enemies.remove(self)
+		allObjects.remove(self)
+		del self
+
+	def listen(self, pos_x, pos_y):
+		pass
 
 
 class Wall(pygame.sprite.Sprite):
@@ -214,9 +237,9 @@ def main():
 			if item == 1:
 				Wall( j*BLOCK_SIZE, i*BLOCK_SIZE )
 			if item == 2:
-				player = Player( j*BLOCK_SIZE, i*BLOCK_SIZE )
+				player = Player( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
 			if item == 3:
-				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE )
+				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
 
 	#Main Loop
 	while True:
@@ -251,7 +274,11 @@ def main():
 
 		#Clear Screen
 		gameDisplay.fill(WHITE)
-		print (len(bullets))
+
+		#Fire bullets
+		for bullet in bullets:
+		 	bullet.fire()
+
 		#Wall Collision Detection
 		for wall in walls:
 		 	player.is_collided_with(wall)
@@ -260,11 +287,14 @@ def main():
 	 		for bullet in bullets:
 	 			if bullet.is_collided_with(wall):
 	 				bullets.remove(bullet)
+	 				allObjects.remove(bullet)
 	 				del bullet
 
-		
-		for bullet in bullets:
-		 	bullet.fire()
+	 	#Check if any bullets hit a character
+		for character in allCharacters:
+			for bullet in bullets:
+				if bullet.is_collided_with(character):
+			 		character.die()
 
 		#Draw every object
 		for item in allObjects:	
