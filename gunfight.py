@@ -71,12 +71,11 @@ class Direction(Enum):
 
 class Radar(pygame.sprite.Sprite):
 	#TODO: Change to a cone shaped sprite
-	def __init__(self, start_x, start_y, radius, direction):
+	def __init__(self, start_x, start_y, direction):
 		self.x = start_x
 		self.y = start_y
-		self.radius = radius
 		self.facing_direction = direction
-		self.rect = pygame.Rect(self.x + self.radius, self.y - self.radius, RADAR_LENGTH, RADAR_WIDTH)
+		self.rect = pygame.Rect(self.x, self.y, RADAR_LENGTH, RADAR_WIDTH)
 		self.blocked = self.blocked_by_wall()[0]
 		radars.append(self)
 
@@ -86,32 +85,32 @@ class Radar(pygame.sprite.Sprite):
 
 	def draw(self):
 		if self.facing_direction == Direction.RIGHT:
-			self.rect = pygame.Rect(self.x + self.radius/2, self.y - self.radius/2, RADAR_LENGTH, RADAR_WIDTH)
+			self.rect = pygame.Rect(self.x, self.y, RADAR_LENGTH, RADAR_WIDTH)
 			if self.blocked_by_wall()[0]:
 				self.blocked = True
-				distance_to_wall = self.blocked_by_wall()[1].x - (self.x + self.radius/2)
-				self.rect = pygame.Rect(self.x + self.radius/2, self.y - self.radius/2, distance_to_wall, RADAR_WIDTH)
+				distance_to_wall = self.blocked_by_wall()[1].x - self.x
+				self.rect = pygame.Rect(self.x, self.y, distance_to_wall, RADAR_WIDTH)
 
 		elif self.facing_direction == Direction.LEFT:
-			self.rect = pygame.Rect(self.x - self.radius/2 - RADAR_LENGTH, self.y - self.radius/2, RADAR_LENGTH, RADAR_WIDTH)
+			self.rect = pygame.Rect(self.x - RADAR_LENGTH, self.y, RADAR_LENGTH, RADAR_WIDTH)
 			if self.blocked_by_wall()[0]:
 				self.blocked = True
-				distance_to_wall = self.x - self.radius/2 - self.blocked_by_wall()[1].x - BLOCK_SIZE
-				self.rect = pygame.Rect(self.x - self.radius/2 - distance_to_wall, self.y - self.radius/2, distance_to_wall, RADAR_WIDTH)
+				distance_to_wall = self.x - self.blocked_by_wall()[1].x - BLOCK_SIZE
+				self.rect = pygame.Rect(self.x - distance_to_wall, self.y, distance_to_wall, RADAR_WIDTH)
 
 		elif self.facing_direction == Direction.UP:
-			self.rect = pygame.Rect(self.x - self.radius/2, self.y - self.radius/2 - RADAR_LENGTH, RADAR_WIDTH, RADAR_LENGTH)
+			self.rect = pygame.Rect(self.x, self.y - RADAR_LENGTH, RADAR_WIDTH, RADAR_LENGTH)
 			if self.blocked_by_wall()[0]:
 				self.blocked = True
-				distance_to_wall = self.y - self.radius/2 - self.blocked_by_wall()[1].y - BLOCK_SIZE
-				self.rect = pygame.Rect(self.x - self.radius/2, self.y - self.radius/2 - distance_to_wall, RADAR_WIDTH, distance_to_wall)
+				distance_to_wall = self.y - self.blocked_by_wall()[1].y - BLOCK_SIZE
+				self.rect = pygame.Rect(self.x, self.y - distance_to_wall, RADAR_WIDTH, distance_to_wall)
 
 		elif self.facing_direction == Direction.DOWN:
-			self.rect = pygame.Rect(self.x - self.radius/2, self.y + self.radius/2, RADAR_WIDTH, RADAR_LENGTH)
+			self.rect = pygame.Rect(self.x, self.y, RADAR_WIDTH, RADAR_LENGTH)
 			if self.blocked_by_wall()[0]:
 				self.blocked = True
-				distance_to_wall = self.blocked_by_wall()[1].y - self.y - self.radius/2
-				self.rect = pygame.Rect(self.x - self.radius/2, self.y + self.radius/2, RADAR_WIDTH, distance_to_wall)
+				distance_to_wall = self.blocked_by_wall()[1].y - self.y
+				self.rect = pygame.Rect(self.x, self.y, RADAR_WIDTH, distance_to_wall)
 
 		pygame.draw.rect(gameDisplay, RED, self.rect, 1)
 
@@ -164,7 +163,7 @@ class Character(pygame.sprite.Sprite):
 		self.velocity = 0
 		self.facing_direction = facing_direction
 		self.rect = pygame.Rect(start_x, start_y, self.size, self.size)
-		self.radar = Radar(start_x, start_y, self.size/2, self.facing_direction)
+		self.radar = Radar(start_x, start_y, self.facing_direction)
 		allObjects.append(self)
 		allCharacters.append(self)
 
@@ -254,7 +253,7 @@ class Character(pygame.sprite.Sprite):
 	def draw(self):
 		#Remaking radar for new location
 		self.radar.destroy()
-		self.radar = Radar(self.rect.x, self.rect.y, self.size, self.facing_direction)
+		self.radar = Radar(self.rect.x + self.size/2, self.rect.y + self.size/2, self.facing_direction)
 		self.radar.draw()
 
 		#Draw character
