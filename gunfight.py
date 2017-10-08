@@ -7,7 +7,7 @@ import pygame
 #Constants
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
-CHARACTER_SIZE = 10
+CHARACTER_SIZE = 40
 BLOCK_SIZE = 40
 BULLET_SIZE = 5
 RADAR_WIDTH = 5
@@ -75,7 +75,7 @@ class Radar(pygame.sprite.Sprite):
 		self.y = start_y
 		self.radius = radius
 		self.facing_direction = direction
-		self.rect = pygame.Rect(self.x + self.radius/2, self.y - self.radius/2, RADAR_LENGTH, RADAR_WIDTH)
+		self.rect = pygame.Rect(self.x + self.radius, self.y - self.radius, RADAR_LENGTH, RADAR_WIDTH)
 		self.blocked = self.blocked_by_wall()[0]
 		radars.append(self)
 
@@ -152,14 +152,14 @@ class Bullet(pygame.sprite.Sprite):
 
 class Character(pygame.sprite.Sprite):
 	def __init__(self, start_x, start_y, facing_direction):
-		self.x = start_x + BLOCK_SIZE/2
-		self.y = start_y + BLOCK_SIZE/2
-		self.radius = CHARACTER_SIZE
+		self.x = start_x
+		self.y = start_y
+		self.size = CHARACTER_SIZE
 		self.velocity = 0
 		self.facing_direction = facing_direction
 		self.moving_direction = Direction.LEFT
-		self.rect = pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius*2, self.radius*2)
-		self.radar = Radar(self.x, self.y, self.radius, self.facing_direction)
+		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
+		self.radar = Radar(self.x, self.y, self.size/2, self.facing_direction)
 		allObjects.append(self)
 		allCharacters.append(self)
 
@@ -168,25 +168,25 @@ class Character(pygame.sprite.Sprite):
 		self.moving_direction = direction
 		if direction == Direction.UP:
 			self.y -= self.velocity
-			self.rect = pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius*2, self.radius*2)
+			self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 			for wall in walls:
 				if self.is_collided_with(wall):
 					self.y += self.velocity
 		elif direction == Direction.DOWN:
 			self.y += self.velocity
-			self.rect = pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius*2, self.radius*2)
+			self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 			for wall in walls:
 				if self.is_collided_with(wall):
 					self.y -= self.velocity
 		elif direction == Direction.RIGHT:
 			self.x += self.velocity
-			self.rect = pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius*2, self.radius*2)
+			self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 			for wall in walls:
 				if self.is_collided_with(wall):
 					self.x -= self.velocity
 		elif direction == Direction.LEFT:
 			self.x -= self.velocity
-			self.rect = pygame.Rect(self.x - self.radius, self.y - self.radius, self.radius*2, self.radius*2)
+			self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 			for wall in walls:
 				if self.is_collided_with(wall):
 					self.x += self.velocity
@@ -258,13 +258,13 @@ class Character(pygame.sprite.Sprite):
 	def shoot(self):
 		#TODO: Countdown timer for gun
 		if self.facing_direction == Direction.LEFT:
-			bullet_params = (self.x - self.radius*2, self.y, self.facing_direction)
+			bullet_params = (self.x - self.size*2, self.y, self.facing_direction)
 		elif self.facing_direction == Direction.RIGHT:
-			bullet_params = (self.x + self.radius*2 , self.y, self.facing_direction)
+			bullet_params = (self.x + self.size*2 , self.y, self.facing_direction)
 		elif self.facing_direction == Direction.UP:
-			bullet_params = (self.x , self.y - self.radius*2, self.facing_direction)
+			bullet_params = (self.x , self.y - self.size*2, self.facing_direction)
 		elif self.facing_direction == Direction.DOWN:
-			bullet_params = (self.x , self.y + self.radius*2, self.facing_direction)
+			bullet_params = (self.x , self.y + self.size*2, self.facing_direction)
 
 		bullet = Bullet(bullet_params[0], bullet_params[1], bullet_params[2])
 		bullet.fire()
@@ -277,12 +277,12 @@ class Character(pygame.sprite.Sprite):
 		#Remaking radar for new location
 		radars.remove(self.radar)
 		del self.radar
-		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
-		self.radar = Radar(self.x, self.y, self.radius, self.facing_direction)
+		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
+		self.radar = Radar(self.x, self.y, self.size, self.facing_direction)
 		self.radar.draw()
 
 		#Draw character
-		pygame.draw.circle(gameDisplay, self.colour, (int(self.x), int(self.y)), self.radius)
+		pygame.draw.rect(gameDisplay, self.colour, self.rect)
 
 
 class Player(Character):
@@ -298,6 +298,7 @@ class Player(Character):
 
 	def die(self):
 		pass
+
 
 class Enemy(Character):
 	def __init__(self, start_x, start_y, facing_direction):
@@ -477,3 +478,4 @@ quit()
 # Object oriented advice from: http://ezide.com/games/writing-games.html
 # Pygame tips from https: //www.pygame.org/docs/tut/ChimpLineByLine.html
 # Pygame tutorial by: https://www.youtube.com/playlist?list=PL6gx4Cwl9DGAjkwJocj7vlc_mFU-4wXJq
+# Collision tips from: http://www.pygame.org/project-Rect+Collision+Response-1061-.html
