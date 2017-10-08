@@ -7,6 +7,7 @@ import pygame
 #Constants
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
+CHARACTER_SIZE = 10
 BLOCK_SIZE = 40
 BULLET_SIZE = 5
 RADAR_WIDTH = 5
@@ -45,11 +46,11 @@ radars = []
 
 #Map
 game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-	   		[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1],
+	   		[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1], 
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1], 
+	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1], 
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 	   		[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 	   		[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -57,7 +58,7 @@ game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	   		[1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	   		[1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	   		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 #Enumerator for directions
@@ -74,18 +75,43 @@ class Radar(pygame.sprite.Sprite):
 		self.y = start_y
 		self.radius = radius
 		self.facing_direction = direction
+		self.rect = pygame.Rect(self.x + self.radius/2, self.y - self.radius/2, RADAR_LENGTH, RADAR_WIDTH)
 		radars.append(self)
 
 	def draw(self):
-		#TODO: have radar cut off by walls
 		if self.facing_direction == Direction.RIGHT:
-			pygame.draw.rect(gameDisplay, RED, (self.x + self.radius, self.y, RADAR_LENGTH, RADAR_WIDTH))
+			self.rect = pygame.Rect(self.x + self.radius/2, self.y - self.radius/2, RADAR_LENGTH, RADAR_WIDTH)
+			if self.blocked_by_wall()[0]:
+				distance_to_wall = self.blocked_by_wall()[1].x - (self.x + self.radius/2)
+				self.rect = pygame.Rect(self.x + self.radius/2, self.y - self.radius/2, distance_to_wall, RADAR_WIDTH)
+
 		elif self.facing_direction == Direction.LEFT:
-			pygame.draw.rect(gameDisplay, RED, (self.x - self.radius - RADAR_LENGTH, self.y, RADAR_LENGTH, RADAR_WIDTH))
+			self.rect = pygame.Rect(self.x - self.radius/2 - RADAR_LENGTH, self.y - self.radius/2, RADAR_LENGTH, RADAR_WIDTH)
+			if self.blocked_by_wall()[0]:
+				distance_to_wall = self.x - self.radius/2 - self.blocked_by_wall()[1].x - BLOCK_SIZE
+				self.rect = pygame.Rect(self.x - self.radius/2 - distance_to_wall, self.y - self.radius/2, distance_to_wall, RADAR_WIDTH)
+
 		elif self.facing_direction == Direction.UP:
-			pygame.draw.rect(gameDisplay, RED, (self.x, self.y - self.radius - RADAR_LENGTH, RADAR_WIDTH, RADAR_LENGTH))
+			self.rect = pygame.Rect(self.x - self.radius/2, self.y - self.radius/2 - RADAR_LENGTH, RADAR_WIDTH, RADAR_LENGTH)
+			if self.blocked_by_wall()[0]:
+				distance_to_wall = self.y - self.radius/2 - self.blocked_by_wall()[1].y - BLOCK_SIZE
+				self.rect = pygame.Rect(self.x - self.radius/2, self.y - self.radius/2 - distance_to_wall, RADAR_WIDTH, distance_to_wall)
+
 		elif self.facing_direction == Direction.DOWN:
-			pygame.draw.rect(gameDisplay, RED, (self.x, self.y + self.radius, RADAR_WIDTH, RADAR_LENGTH))
+			self.rect = pygame.Rect(self.x - self.radius/2, self.y + self.radius/2, RADAR_WIDTH, RADAR_LENGTH)
+			if self.blocked_by_wall()[0]:
+				distance_to_wall = self.blocked_by_wall()[1].y - self.y - self.radius/2
+				print(distance_to_wall)
+				self.rect = pygame.Rect(self.x - self.radius/2, self.y + self.radius/2, RADAR_WIDTH, distance_to_wall)
+
+		print()
+		pygame.draw.rect(gameDisplay, RED, self.rect, 1)
+
+	def blocked_by_wall(self):
+		for wall in walls:
+			if self.rect.colliderect(wall):
+				return (True, wall)
+		return (False, None)
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -124,7 +150,7 @@ class Character(pygame.sprite.Sprite):
 	def __init__(self, start_x, start_y, facing_direction):
 		self.x = start_x + BLOCK_SIZE/2
 		self.y = start_y + BLOCK_SIZE/2
-		self.radius = 10
+		self.radius = CHARACTER_SIZE
 		self.velocity = 0
 		self.facing_direction = facing_direction
 		self.moving_direction = Direction.LEFT
@@ -216,7 +242,7 @@ class Character(pygame.sprite.Sprite):
 		if self.velocity != 0:
 			self.walk(self.moving_direction)
 
-		#Remake radar for new location
+		#Remaking radar for new location
 		radars.remove(self.radar)
 		del self.radar
 		self.rect = pygame.Rect(self.x, self.y, self.radius*2, self.radius*2)
@@ -261,9 +287,17 @@ class Enemy(Character):
 
 	def follow(self):
 		#TODO: Stay triggered until the enemy reaches the target location
-		print("Following!")
-		self.triggered = False
-
+		if self.x < self.target_x:
+			self.orient(self.target_x, self.target_y)
+		if self.x > self.target_x:
+			self.orient(self.target_x, self.target_y)
+		if self.y > self.target_y:
+			self.orient(self.target_x, self.target_y)
+		if self.y < self.target_y:
+			self.orient(self.target_x, self.target_y)
+		if self.x == self.target_x and self.y == self.target_y:
+			self.triggered = False
+		
 
 class Wall(pygame.sprite.Sprite):
 	def __init__(self, start_x, start_y):
@@ -367,9 +401,10 @@ def main():
 			item.draw()
 
 		#Check if all enemies are dead
+		"""
 		if len(enemies) == 0:
 			return
-
+		"""
 		pygame.display.update()
 
 	#End Game
