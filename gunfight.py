@@ -68,8 +68,9 @@ class Direction(Enum):
 	UP = 3
 	DOWN = 4
 
-#Classes for our game objects
+
 class Radar(pygame.sprite.Sprite):
+	#TODO: Change to a cone shaped sprite
 	def __init__(self, start_x, start_y, radius, direction):
 		self.x = start_x
 		self.y = start_y
@@ -78,6 +79,10 @@ class Radar(pygame.sprite.Sprite):
 		self.rect = pygame.Rect(self.x + self.radius, self.y - self.radius, RADAR_LENGTH, RADAR_WIDTH)
 		self.blocked = self.blocked_by_wall()[0]
 		radars.append(self)
+
+	def destroy(self):
+		radars.remove(self)
+		del self
 
 	def draw(self):
 		if self.facing_direction == Direction.RIGHT:
@@ -121,31 +126,28 @@ class Radar(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
 	#TODO: Follow character class and remove self.x make into self.rect.x
 	def __init__(self, start_x, start_y, direction):
-		self.x = start_x
-		self.y = start_y
 		self.velocity = 0
 		self.facing_direction = direction
 		self.size = BULLET_SIZE
 		self.colour = BLUE
 		self.direction = direction
-		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
+		self.rect = pygame.Rect(start_x, start_y, self.size, self.size)
 		bullets.append(self)
 		allObjects.append(self)
 
 	def fire(self):
 		self.velocity = BULLET_SPEED
 		if self.direction == Direction.UP:
-			self.y -= self.velocity
+			self.rect.y -= self.velocity
 		elif self.direction == Direction.DOWN:
-			self.y += self.velocity
+			self.rect.y += self.velocity
 		elif self.direction == Direction.RIGHT:
-			self.x += self.velocity
+			self.rect.x += self.velocity
 		elif self.direction == Direction.LEFT:
-			self.x -= self.velocity
+			self.rect.x -= self.velocity
 
 	def draw(self):
-		self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
-		pygame.draw.rect(gameDisplay, self.colour, [self.x, self.y, self.size, self.size])
+		pygame.draw.rect(gameDisplay, self.colour, self.rect)
 
 	def destroy(self):
 		bullets.remove(self)
@@ -251,8 +253,7 @@ class Character(pygame.sprite.Sprite):
 
 	def draw(self):
 		#Remaking radar for new location
-		radars.remove(self.radar)
-		del self.radar
+		self.radar.destroy()
 		self.radar = Radar(self.rect.x, self.rect.y, self.size, self.facing_direction)
 		self.radar.draw()
 
@@ -283,8 +284,7 @@ class Enemy(Character):
 		enemies.append(self)
 
 	def die(self):
-		radars.remove(self.radar)
-		del self.radar
+		self.radar.destroy()
 		enemies.remove(self)
 		allObjects.remove(self)
 		del self
