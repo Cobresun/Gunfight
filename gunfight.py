@@ -236,6 +236,8 @@ class Character(pygame.sprite.Sprite):
 
 	def shoot(self):
 		#TODO: Countdown timer for gun
+		pygame.mixer.music.load('gunshot.wav')
+		pygame.mixer.music.play()
 		if self.facing_direction == Direction.LEFT:
 			bullet_params = (self.rect.x, self.rect.y + self.size/2, self.facing_direction)
 		elif self.facing_direction == Direction.RIGHT:
