@@ -16,7 +16,7 @@ RADAR_LENGTH = 3 * BLOCK_SIZE
 HEARING_RANGE = 9 * BLOCK_SIZE
 
 CHARACTER_SPEED = 10
-BULLET_SPEED = 40
+BULLET_SPEED = 60
 
 FPS = 60
 
@@ -32,7 +32,7 @@ SILVER = (192, 192, 192)
 pygame.init()
 pygame.display.set_caption('Gunfight')
 clock = pygame.time.Clock()
-font = pygame.font.SysFont(None, 25) #Font size 25
+
 
 #Create The Backgound
 gameDisplay = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
@@ -95,12 +95,17 @@ class Radar(pygame.sprite.Sprite):
 		self.rect = pygame.Rect(self.x, self.y, RADAR_LENGTH, RADAR_WIDTH)
 		self.blocked = self.blocked_by_wall()[0]
 		radars.append(self)
+		allObjects.append(self)
 
 	def destroy(self):
-		radars.remove(self)
-		del self
+		try:
+			radars.remove(self)
+			allObjects.remove(self)
+			del self
+		except ValueError:
+			pass
 
-	def draw(self):
+	def orient(self):
 		if self.facing_direction == Direction.RIGHT:
 			self.rect = pygame.Rect(self.x, self.y, RADAR_LENGTH, RADAR_WIDTH)
 			if self.blocked_by_wall()[0]:
@@ -129,7 +134,6 @@ class Radar(pygame.sprite.Sprite):
 				distance_to_wall = self.blocked_by_wall()[1].y - self.y
 				self.rect = pygame.Rect(self.x, self.y, RADAR_WIDTH, distance_to_wall)
 
-		pygame.draw.rect(gameDisplay, RED, self.rect, 1)
 
 	def blocked_by_wall(self):
 		for wall in walls:
@@ -137,6 +141,9 @@ class Radar(pygame.sprite.Sprite):
 				return (True, wall)
 		self.blocked = False
 		return (False, None)
+
+	def draw(self):
+		pygame.draw.rect(gameDisplay, RED, self.rect, 1)
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -269,7 +276,7 @@ class Character(pygame.sprite.Sprite):
 		#Remaking radar for new location
 		self.radar.destroy()
 		self.radar = Radar(self.rect.x + self.size/2, self.rect.y + self.size/2, self.facing_direction)
-		self.radar.draw()
+		self.radar.orient()
 
 		#Draw character
 		pygame.draw.rect(gameDisplay, self.colour, self.rect)
@@ -281,10 +288,12 @@ class Player(Character):
 		self.colour = GREEN
 
 	def die(self):
-		print ("You were hit GG")
-		self.radar.destroy()
-		allObjects.remove(self)
-		del self
+		try:
+			self.radar.destroy()
+			allObjects.remove(self)
+			del self
+		except ValueError:
+			pass
 
 
 class Enemy(Character):
@@ -295,10 +304,13 @@ class Enemy(Character):
 		enemies.append(self)
 
 	def die(self):
-		self.radar.destroy()
-		enemies.remove(self)
-		allObjects.remove(self)
-		del self
+		try:
+			self.radar.destroy()
+			enemies.remove(self)
+			allObjects.remove(self)
+			del self
+		except ValueError:
+			pass
 
 	def listen(self, pos_x, pos_y):
 		distance_x = math.fabs(self.rect.x - pos_x)
@@ -353,127 +365,213 @@ class Wall(pygame.sprite.Sprite):
 	def draw(self):
 		pygame.draw.rect(gameDisplay, self.colour, [self.x, self.y, self.size, self.size])
 
+	def destroy(self):
+		walls.remove(self)
+		allObjects.remove(self)
+		del self
 
-def message_to_screen(msg, colour, pos_x, pos_y):
-	screen_text = font.render(msg, True, colour)
-	gameDisplay.blit(screen_text, [pos_x, pos_y])
+
+def pickFont(size):
+	font = pygame.font.SysFont("comicsansms", size)
+	return font
+
+
+def message_to_screen(msg, colour, pos_x, pos_y, size):
+	textSurf = pickFont(size).render(msg, True, colour)
+	textRect = pickFont(size).render(msg, True, colour).get_rect()
+	textRect.center = (pos_x), (pos_y)
+	gameDisplay.blit(textSurf, textRect)
 
 
 #Main Game 
-def main():
-	#Create the Backgound
-	gameDisplay.fill(WHITE)
-
-	#Create the Map
-	for i, row in enumerate(game_map):
-		for j, item in enumerate(row):
-			if item == 1:
-				Wall( j*BLOCK_SIZE, i*BLOCK_SIZE )
-			if item == 2:
-				player = Player( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
-			if item == 3:
-				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
-			if item == 4:
-				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.RIGHT )
-			if item == 5:
-				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.UP )
-			if item == 6:
-				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.DOWN )
+def gameLoop():
+	gameExit = False
+	gameLost = False
+	gameRestart = True
+	gameRunning = False
+	gameWon = False
 
 	#TODO: Make it so that each enemy's countdown is part of their object, right now all 3 abide by same cooldown we do !!
 	playerCountDown = CountDownClock()
 
-	running = True
-
 	#Main Loop
-	while running:
+	while not gameExit:
 		clock.tick(FPS)
 
-		#Clear Screen
-		gameDisplay.fill(WHITE)
+		while gameRestart:
 
-		if playerCountDown.clock_running:
-			playerCountDown.act()
-
-		#Controller
-		for e in pygame.event.get():
-			if e.type == pygame.QUIT:
-				return
-			if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-				return
-			if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
-				for enemy in enemies:
-					enemy.shoot()
-			if e.type == pygame.MOUSEBUTTONDOWN:
-				if not playerCountDown.clock_running:
-					player.shoot()
-					playerCountDown.clock_running = True
-					for enemy in enemies:
-						enemy.listen( player.rect.x, player.rect.y )
-				
-		
-		# Move the player if an arrow key is pressed
-		key = pygame.key.get_pressed()
-		if key[pygame.K_a]:
-			player.walk(Direction.LEFT)
-		if key[pygame.K_d]:
-			player.walk(Direction.RIGHT)
-		if key[pygame.K_w]:
-			player.walk(Direction.UP)
-		if key[pygame.K_s]:
-			player.walk(Direction.DOWN)
-
-		#Orient player direction
-		mouse_pos = pygame.mouse.get_pos()
-		player.orient( mouse_pos[0], mouse_pos[1] )
-
-		#Fire bullets
-		for bullet in bullets:
-			bullet.fire()
-
-		#Wall Collision Detection
-		for wall in walls:
+			for character in allCharacters:
+				character.die()
+			for wall in walls:
+				wall.destroy()
 			for bullet in bullets:
-				if bullet.is_collided_with(wall):
-					bullet.destroy()
+				bullet.destroy()
 
-		for enemy in enemies:
-			if enemy.radar.rect.colliderect(player.rect):
-				enemy.shoot()
+			#Create the Map
+			for i, row in enumerate(game_map):
+				for j, item in enumerate(row):
+					if item == 1:
+						Wall( j*BLOCK_SIZE, i*BLOCK_SIZE )
+					if item == 2:
+						player = Player( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
+					if item == 3:
+						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
+					if item == 4:
+						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.RIGHT )
+					if item == 5:
+						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.UP )
+					if item == 6:
+						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.DOWN )
+
+			gameRestart = False
+			gameRunning = True
 
 
-		#Check if any bullets hit a character
-		for bullet in bullets:
+		while gameLost:
+			for character in allCharacters:
+				character.die()
+			for wall in walls:
+				wall.destroy()
+			for bullet in bullets:
+				bullet.destroy()
+
+			gameDisplay.fill(WHITE)
+			message_to_screen("You Died! Press 'r' to restart level.", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
+			pygame.display.update()
+
+			for e in pygame.event.get():
+				if e.type == pygame.QUIT:
+					gameExit = True
+					gameLost = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+					gameExit = True
+					gameLost = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
+					gameLost = False
+					gameRestart = True
+
+
+		while gameWon:
+			#TODO: Switch to next level
+			for character in allCharacters:
+				character.die()
+			for wall in walls:
+				wall.destroy()
+			for bullet in bullets:
+				bullet.destroy()
+
+			gameDisplay.fill(WHITE)
+			message_to_screen("You won! Press 'r' to restart level.", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
+			pygame.display.update()
+			
+			for e in pygame.event.get():
+				if e.type == pygame.QUIT:
+					gameExit = True
+					gameWon = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+					gameExit = True
+					gameWon = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
+					gameRestart = True
+					gameWon = False
+
+
+		while gameRunning:
+
+			#Create the Backgound
+			gameDisplay.fill(WHITE)
+
+			#Clear Screen
+			gameDisplay.fill(WHITE)
+
+			if playerCountDown.clock_running:
+				playerCountDown.act()
+
+			#Controller
+			for e in pygame.event.get():
+				if e.type == pygame.QUIT:
+					gameExit = True
+					gameRunning = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+					gameExit = True
+					gameRunning = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
+					for enemy in enemies:
+						enemy.shoot()
+				if e.type == pygame.MOUSEBUTTONDOWN:
+					if not playerCountDown.clock_running:
+						player.shoot()
+						playerCountDown.clock_running = True
+						for enemy in enemies:
+							enemy.listen( player.rect.x, player.rect.y )
+					
+			
+			# Move the player if an arrow key is pressed
+			key = pygame.key.get_pressed()
+			if key[pygame.K_a]:
+				player.walk(Direction.LEFT)
+			if key[pygame.K_d]:
+				player.walk(Direction.RIGHT)
+			if key[pygame.K_w]:
+				player.walk(Direction.UP)
+			if key[pygame.K_s]:
+				player.walk(Direction.DOWN)
+
+			#Orient player direction
+			mouse_pos = pygame.mouse.get_pos()
+			player.orient( mouse_pos[0], mouse_pos[1] )
+
+			#Fire bullets
+			for bullet in bullets:
+				bullet.fire()
+
+			#Wall Collision Detection
+			for wall in walls:
+				for bullet in bullets:
+					if bullet.is_collided_with(wall):
+						bullet.destroy()
+
 			for enemy in enemies:
-				if bullet.is_collided_with(enemy):
-					bullet.destroy()
-					enemy.die()
-					break
-			if bullet.is_collided_with(player):
-				player.die()
-				running = False
-
-		#Enemy following
-		for enemy in enemies:
-			if enemy.triggered:
-				enemy.follow()
-
-		#Check if all enemies are dead
-		if len(enemies) == 0:
-			print ("You win!")
-			running = False
-
-		#Draw every object
-		for item in allObjects:	
-			item.draw()
-
-		#Draw instructions last so that it covers all other objects
-		message_to_screen("Kill all the bad guys!", RED, 200, 100)
+				if enemy.radar.rect.colliderect(player.rect):
+					enemy.shoot()
 
 
-		pygame.display.update()
+			#Check if any bullets hit a character
+			for bullet in bullets:
+				for enemy in enemies:
+					if bullet.is_collided_with(enemy):
+						bullet.destroy()
+						enemy.die()
+						break
+				if bullet.is_collided_with(player):
+					player.die()
+					gameLost = True
+					gameRunning = False
 
-	main()
+			#Enemy following
+			for enemy in enemies:
+				if enemy.triggered:
+					enemy.follow()
+
+			#Check if all enemies are dead
+			if len(enemies) == 0:
+				gameWon = True
+				gameRunning = False
+
+			#Draw every object
+			for item in allObjects:	
+				item.draw()
+
+			#Draw instructions last so that it covers all other objects
+			message_to_screen("Kill all the bad guys!", RED, 400, 400, 50)
+
+			pygame.display.update()
+
+
+def main():
+	#Main body
+	gameLoop()
+
 
 if __name__ == '__main__':
 	main()
