@@ -15,7 +15,7 @@ RADAR_LENGTH = 3 * BLOCK_SIZE
 HEARING_RANGE = 9 * BLOCK_SIZE
 
 CHARACTER_SPEED = 10
-BULLET_SPEED = 20
+BULLET_SPEED = 40
 
 FPS = 60
 
@@ -48,7 +48,7 @@ radars = []
 game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
-			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 4, 0, 1, 1, 1], 
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 1, 1, 1], 
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
@@ -251,17 +251,16 @@ class Character(pygame.sprite.Sprite):
 					self.facing_direction = Direction.UP		
 
 	def shoot(self):
-		#TODO: Countdown timer for gun
 		pygame.mixer.music.load("gunshot.aiff")
 		pygame.mixer.music.play()
 		if self.facing_direction == Direction.LEFT:
-			bullet_params = (self.rect.x, self.rect.y + self.size/2, self.facing_direction)
+			bullet_params = (self.rect.x - 5, self.rect.y + self.size/2, self.facing_direction)
 		elif self.facing_direction == Direction.RIGHT:
-			bullet_params = (self.rect.x + self.size, self.rect.y + self.size/2, self.facing_direction)
+			bullet_params = (self.rect.x + self.size + 5, self.rect.y + self.size/2, self.facing_direction)
 		elif self.facing_direction == Direction.UP:
-			bullet_params = (self.rect.x + self.size/2 , self.rect.y, self.facing_direction)
+			bullet_params = (self.rect.x + self.size/2 , self.rect.y - 5, self.facing_direction)
 		elif self.facing_direction == Direction.DOWN:
-			bullet_params = (self.rect.x + self.size/2 , self.rect.y + self.size, self.facing_direction)
+			bullet_params = (self.rect.x + self.size/2 , self.rect.y + self.size + 5, self.facing_direction)
 
 		bullet = Bullet(bullet_params[0], bullet_params[1], bullet_params[2])
 
@@ -374,15 +373,17 @@ def main():
 			if item == 6:
 				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.DOWN )
 
-	#Starter tick
-	countDown = CountDownClock()
+	#TODO: Make it so that each enemy's countdown is part of their object, right now all 3 abide by same cooldown we do !!
+	playerCountDown = CountDownClock()
+	enemyCountDown = CountDownClock()
 
 	#Main Loop
 	while True:
 		clock.tick(FPS)
-
-		if countDown.clock_running:
-			countDown.act()
+		if playerCountDown.clock_running:
+			playerCountDown.act()
+		if enemyCountDown.clock_running:
+			enemyCountDown.act()
 
 		#Controller
 		for e in pygame.event.get():
@@ -393,10 +394,11 @@ def main():
 			if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
 				for enemy in enemies:
 					enemy.shoot()
+					enemyCountDown.clock_running = True
 			if e.type == pygame.MOUSEBUTTONDOWN:
-				if not countDown.clock_running:
+				if not playerCountDown.clock_running:
 					player.shoot()
-					countDown.clock_running = True
+					playerCountDown.clock_running = True
 					for enemy in enemies:
 						enemy.listen( player.rect.x, player.rect.y )
 				
@@ -429,16 +431,23 @@ def main():
 				if bullet.is_collided_with(wall):
 					bullet.destroy()
 
-		#Check if any bullets hit a character
-		for character in allCharacters:
-			for bullet in bullets:
-				if bullet.is_collided_with(character):
-					character.die()
-					bullet.destroy()
-
 		for enemy in enemies:
 			if enemy.radar.rect.colliderect(player.rect):
-				enemy.shoot() 
+				if not enemyCountDown.clock_running:
+					enemy.shoot()
+					enemyCountDown.clock_running = True
+
+
+		#Check if any bullets hit a character
+		for bullet in bullets:
+			for enemy in enemies:
+				if bullet.is_collided_with(enemy):
+					bullet.destroy()
+					enemy.die()
+					break
+			if bullet.is_collided_with(player):
+				player.die()
+				break
 
 		#Enemy following
 		for enemy in enemies:
