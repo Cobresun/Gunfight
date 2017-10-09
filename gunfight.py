@@ -7,6 +7,7 @@ import pygame
 #Constants
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
+
 BLOCK_SIZE = 40
 CHARACTER_SIZE = BLOCK_SIZE
 BULLET_SIZE = 5
@@ -30,8 +31,8 @@ SILVER = (192, 192, 192)
 #Initialize Everything 
 pygame.init()
 pygame.display.set_caption('Gunfight')
-# pygame.mouse.set_visible(0)
 clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 25) #Font size 25
 
 #Create The Backgound
 gameDisplay = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
@@ -352,6 +353,12 @@ class Wall(pygame.sprite.Sprite):
 	def draw(self):
 		pygame.draw.rect(gameDisplay, self.colour, [self.x, self.y, self.size, self.size])
 
+
+def message_to_screen(msg, colour, pos_x, pos_y):
+	screen_text = font.render(msg, True, colour)
+	gameDisplay.blit(screen_text, [pos_x, pos_y])
+
+
 #Main Game 
 def main():
 	#Create the Backgound
@@ -375,15 +382,18 @@ def main():
 
 	#TODO: Make it so that each enemy's countdown is part of their object, right now all 3 abide by same cooldown we do !!
 	playerCountDown = CountDownClock()
-	enemyCountDown = CountDownClock()
+
+	running = True
 
 	#Main Loop
-	while True:
+	while running:
 		clock.tick(FPS)
+
+		#Clear Screen
+		gameDisplay.fill(WHITE)
+
 		if playerCountDown.clock_running:
 			playerCountDown.act()
-		if enemyCountDown.clock_running:
-			enemyCountDown.act()
 
 		#Controller
 		for e in pygame.event.get():
@@ -394,7 +404,6 @@ def main():
 			if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
 				for enemy in enemies:
 					enemy.shoot()
-					enemyCountDown.clock_running = True
 			if e.type == pygame.MOUSEBUTTONDOWN:
 				if not playerCountDown.clock_running:
 					player.shoot()
@@ -414,9 +423,6 @@ def main():
 		if key[pygame.K_s]:
 			player.walk(Direction.DOWN)
 
-		#Clear Screen
-		gameDisplay.fill(WHITE)
-
 		#Orient player direction
 		mouse_pos = pygame.mouse.get_pos()
 		player.orient( mouse_pos[0], mouse_pos[1] )
@@ -433,9 +439,7 @@ def main():
 
 		for enemy in enemies:
 			if enemy.radar.rect.colliderect(player.rect):
-				if not enemyCountDown.clock_running:
-					enemy.shoot()
-					enemyCountDown.clock_running = True
+				enemy.shoot()
 
 
 		#Check if any bullets hit a character
@@ -447,7 +451,7 @@ def main():
 					break
 			if bullet.is_collided_with(player):
 				player.die()
-				break
+				running = False
 
 		#Enemy following
 		for enemy in enemies:
@@ -457,21 +461,24 @@ def main():
 		#Check if all enemies are dead
 		if len(enemies) == 0:
 			print ("You win!")
+			running = False
 
 		#Draw every object
 		for item in allObjects:	
 			item.draw()
 
+		#Draw instructions last so that it covers all other objects
+		message_to_screen("Kill all the bad guys!", RED, 200, 100)
+
+
 		pygame.display.update()
 
-	#End Game
-	pygame.quit()
-
+	main()
 
 if __name__ == '__main__':
 	main()
-
-quit()
+	pygame.quit()
+	quit()
 
 # Object oriented advice from: http://ezide.com/games/writing-games.html
 # Pygame tips from https: //www.pygame.org/docs/tut/ChimpLineByLine.html
