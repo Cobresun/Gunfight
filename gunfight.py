@@ -67,11 +67,11 @@ level1 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-			[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1], 
-			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1], 
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -119,6 +119,7 @@ class Direction(Enum):
 
 
 class CountDownClock():
+	#TODO: Pretty sure this doesn't always work, need to look into fixing this...
 	def __init__(self):
 		self.clock_running = False
 		self.start_ticks = pygame.time.get_ticks()
@@ -420,7 +421,7 @@ class Wall(pygame.sprite.Sprite):
 
 
 def pickFont(size):
-	font = pygame.font.SysFont("comicsansms", size)
+	font = pygame.font.SysFont("monospace", size)
 	return font
 
 
@@ -431,7 +432,6 @@ def message_to_screen(msg, colour, pos_x, pos_y, size):
 	gameDisplay.blit(textSurf, textRect)
 
 
-#Main Game 
 def gameLoop():
 	game_map = level1
 
@@ -560,6 +560,9 @@ def gameLoop():
 				if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
 					for enemy in enemies:
 						enemy.shoot()
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
+					gameRestart = True
+					gameRunning = False
 				if e.type == pygame.MOUSEBUTTONDOWN:
 					if not playerCountDown.clock_running:
 						player.shoot()
@@ -626,17 +629,20 @@ def gameLoop():
 
 			#Draw instructions last so that it covers all other objects
 			if gameLevel1:
-				message_to_screen("Your mission is to kill all the enemies (grey blocks) on the screen", RED, 400, 400, 25)
-				message_to_screen("Click the mouse to shoot them", RED, 400, 450, 25)
-				message_to_screen("Theres a 5 second reload time for the gun, so be smart about it!", RED, 400, 500, 25)
+				message_to_screen("Use the 'w' (up), 'a' (left), 's' (down) and 'd'(right keys to move)", RED, 400, 50, 25)
+				message_to_screen("Move the mouse around your player (green block) to direct your gun)", RED, 400, 75, 25)
+				message_to_screen("Your mission is to kill all the enemies (grey blocks) on the screen", RED, 400, 500, 25)
+				message_to_screen("Click the mouse to shoot", RED, 400, 525, 25)
 
 			if gameLevel2:
-				message_to_screen("If you walk into the sight of the enemy (shown by its red radar)", RED, 400, 400, 25)
-				message_to_screen("The enemy will kill you! ", RED, 400, 450, 25)
+				message_to_screen("If you walk into the sight of the enemy (shown by its red radar)", RED, 400, 50, 25)
+				message_to_screen("The enemy will kill you", RED, 400, 75, 25)
+				message_to_screen("Theres a 5 second reload time for the gun, so be smart about it", RED, 400, 500, 25)
 
 			if gameLevel3:
-				message_to_screen("The enemies can hear gunshots and will rush to where it came from", RED, 400, 400, 25)
-				message_to_screen("So make sure to run away before they catch you! ", RED, 400, 450, 25)
+				message_to_screen("You can restart the level by hitting the 'r' key", RED, 400, 475, 25)
+				message_to_screen("The enemies can hear gunshots and will rush to where it came from", RED, 400, 500, 25)
+				message_to_screen("So make sure to run away before they catch you", RED, 400, 525, 25)
 
 			pygame.display.update()
 
