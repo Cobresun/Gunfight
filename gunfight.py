@@ -16,7 +16,7 @@ RADAR_LENGTH = 3 * BLOCK_SIZE
 HEARING_RANGE = 9 * BLOCK_SIZE
 
 CHARACTER_SPEED = 10
-BULLET_SPEED = 60
+BULLET_SPEED = 40
 
 FPS = 60
 
@@ -46,7 +46,55 @@ allCharacters = []
 radars = []
 
 #Map
-game_map = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+level0 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+level1 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+level2 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+level3 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 1, 1, 1], 
@@ -385,13 +433,18 @@ def message_to_screen(msg, colour, pos_x, pos_y, size):
 
 #Main Game 
 def gameLoop():
+	game_map = level1
+
 	gameExit = False
 	gameLost = False
 	gameRestart = True
 	gameRunning = False
 	gameWon = False
 
-	#TODO: Make it so that each enemy's countdown is part of their object, right now all 3 abide by same cooldown we do !!
+	gameLevel1 = True
+	gameLevel2 = False
+	gameLevel3 = False
+
 	playerCountDown = CountDownClock()
 
 	#Main Loop
@@ -399,6 +452,8 @@ def gameLoop():
 		clock.tick(FPS)
 
 		while gameRestart:
+
+			playerCountDown = CountDownClock()
 
 			for character in allCharacters:
 				character.die()
@@ -452,7 +507,6 @@ def gameLoop():
 
 
 		while gameWon:
-			#TODO: Switch to next level
 			for character in allCharacters:
 				character.die()
 			for wall in walls:
@@ -461,7 +515,7 @@ def gameLoop():
 				bullet.destroy()
 
 			gameDisplay.fill(WHITE)
-			message_to_screen("You won! Press 'r' to restart level.", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
+			message_to_screen("You won! Press 'n' for next level.", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
 			pygame.display.update()
 			
 			for e in pygame.event.get():
@@ -471,7 +525,15 @@ def gameLoop():
 				if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
 					gameExit = True
 					gameWon = False
-				if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_n:
+					if gameLevel1:
+						gameLevel1 = False
+						gameLevel2 = True
+						game_map = level2
+					elif gameLevel2:
+						gameLevel2 = False
+						gameLevel3 = True
+						game_map = level3
 					gameRestart = True
 					gameWon = False
 
@@ -563,7 +625,18 @@ def gameLoop():
 				item.draw()
 
 			#Draw instructions last so that it covers all other objects
-			message_to_screen("Kill all the bad guys!", RED, 400, 400, 50)
+			if gameLevel1:
+				message_to_screen("Your mission is to kill all the enemies (grey blocks) on the screen", RED, 400, 400, 25)
+				message_to_screen("Click the mouse to shoot them", RED, 400, 450, 25)
+				message_to_screen("Theres a 5 second reload time for the gun, so be smart about it!", RED, 400, 500, 25)
+
+			if gameLevel2:
+				message_to_screen("If you walk into the sight of the enemy (shown by its red radar)", RED, 400, 400, 25)
+				message_to_screen("The enemy will kill you! ", RED, 400, 450, 25)
+
+			if gameLevel3:
+				message_to_screen("The enemies can hear gunshots and will rush to where it came from", RED, 400, 400, 25)
+				message_to_screen("So make sure to run away before they catch you! ", RED, 400, 450, 25)
 
 			pygame.display.update()
 
