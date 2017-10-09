@@ -69,6 +69,22 @@ class Direction(Enum):
 	DOWN = 4
 
 
+class CountDownClock():
+	def __init__(self):
+		self.clock_running = False
+		self.start_ticks = pygame.time.get_ticks()
+
+	def restart(self):
+		self.start_ticks = pygame.time.get_ticks()
+		self.clock_running = False
+		pygame.mixer.music.load("reload.aiff")
+		pygame.mixer.music.play()
+
+	def act(self):
+		if int((pygame.time.get_ticks() - self.start_ticks)/1000)  == 5:
+			self.restart()
+
+
 class Radar(pygame.sprite.Sprite):
 	#TODO: Change to a cone shaped sprite
 	def __init__(self, start_x, start_y, direction):
@@ -236,7 +252,7 @@ class Character(pygame.sprite.Sprite):
 
 	def shoot(self):
 		#TODO: Countdown timer for gun
-		pygame.mixer.music.load('gunshot.wav')
+		pygame.mixer.music.load("gunshot.aiff")
 		pygame.mixer.music.play()
 		if self.facing_direction == Direction.LEFT:
 			bullet_params = (self.rect.x, self.rect.y + self.size/2, self.facing_direction)
@@ -248,7 +264,6 @@ class Character(pygame.sprite.Sprite):
 			bullet_params = (self.rect.x + self.size/2 , self.rect.y + self.size, self.facing_direction)
 
 		bullet = Bullet(bullet_params[0], bullet_params[1], bullet_params[2])
-		bullet.fire()
 
 	def draw(self):
 		#Remaking radar for new location
@@ -265,14 +280,11 @@ class Player(Character):
 		Character.__init__(self, start_x, start_y, facing_direction)
 		self.colour = GREEN
 
-	def check_if_hit(self):
-		for enemy in enemies:
-			if enemy.radar.rect.colliderect(self.rect):
-				return True
-		return False
-
 	def die(self):
-		pass
+		print ("You were hit GG")
+		self.radar.destroy()
+		allObjects.remove(self)
+		del self
 
 
 class Enemy(Character):
@@ -326,7 +338,7 @@ class Enemy(Character):
 				if not self.radar.blocked:
 					self.walk(self.facing_direction)
 					return
-		
+
 
 class Wall(pygame.sprite.Sprite):
 	def __init__(self, start_x, start_y):
@@ -362,9 +374,15 @@ def main():
 			if item == 6:
 				Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.DOWN )
 
+	#Starter tick
+	countDown = CountDownClock()
+
 	#Main Loop
 	while True:
 		clock.tick(FPS)
+
+		if countDown.clock_running:
+			countDown.act()
 
 		#Controller
 		for e in pygame.event.get():
@@ -372,10 +390,16 @@ def main():
 				return
 			if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
 				return
-			if e.type == pygame.MOUSEBUTTONDOWN:
-				player.shoot()
+			if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
 				for enemy in enemies:
-					enemy.listen( player.rect.x, player.rect.y )
+					enemy.shoot()
+			if e.type == pygame.MOUSEBUTTONDOWN:
+				if not countDown.clock_running:
+					player.shoot()
+					countDown.clock_running = True
+					for enemy in enemies:
+						enemy.listen( player.rect.x, player.rect.y )
+				
 		
 		# Move the player if an arrow key is pressed
 		key = pygame.key.get_pressed()
@@ -412,8 +436,9 @@ def main():
 					character.die()
 					bullet.destroy()
 
-		if player.check_if_hit():
-			print ("You've been hit!")
+		for enemy in enemies:
+			if enemy.radar.rect.colliderect(player.rect):
+				enemy.shoot() 
 
 		#Enemy following
 		for enemy in enemies:
