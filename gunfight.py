@@ -3,7 +3,7 @@ import os, sys
 import math
 from enum import Enum
 import pygame
-
+import copy
 #Constants
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
@@ -21,7 +21,7 @@ BULLET_SPEED = 40
 FPS = 60
 
 #Colours
-WHITE = (250, 250, 250)
+WHITE = (255, 255, 245)
 BLACK = (0, 0, 0)
 RED = (250, 0, 0)
 GREEN = (0, 250, 0)
@@ -69,7 +69,7 @@ level1 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
-			[1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1], 
+			[1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1], 
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -118,6 +118,22 @@ class Direction(Enum):
 	DOWN = 4
 
 
+class Grid():
+	def __init__(self, start_map):
+		self.grid = start_map
+		self.clear_all_enemies()
+
+	def clear_all_enemies(self):
+		for i, row in enumerate(self.grid):
+			for j, item in enumerate(row):
+				if item != 0 and item != 1 and item != 2:
+					self.grid[i][j] = 0
+
+	def addTarget(self, target_x, target_y):
+		pass
+		#player.rect.x == target_x and player.rect.y == target_y
+
+
 class CountDownClock():
 	#TODO: Pretty sure this doesn't always work, need to look into fixing this...
 	def __init__(self):
@@ -147,12 +163,9 @@ class Radar(pygame.sprite.Sprite):
 		allObjects.append(self)
 
 	def destroy(self):
-		try:
-			radars.remove(self)
-			allObjects.remove(self)
-			del self
-		except ValueError:
-			pass
+		radars.remove(self)
+		allObjects.remove(self)
+		del self
 
 	def orient(self):
 		if self.facing_direction == Direction.RIGHT:
@@ -319,7 +332,7 @@ class Character(pygame.sprite.Sprite):
 		elif self.facing_direction == Direction.DOWN:
 			bullet_params = (self.rect.x + self.size/2 , self.rect.y + self.size + 5, self.facing_direction)
 
-		bullet = Bullet(bullet_params[0], bullet_params[1], bullet_params[2])
+		Bullet(bullet_params[0], bullet_params[1], bullet_params[2])
 
 	def draw(self):
 		#Remaking radar for new location
@@ -337,29 +350,27 @@ class Player(Character):
 		self.colour = GREEN
 
 	def die(self):
-		try:
-			self.radar.destroy()
-			allObjects.remove(self)
-			del self
-		except ValueError:
-			pass
+		self.radar.destroy()
+		allObjects.remove(self)
+		allCharacters.remove(self)
+		del self
 
 
 class Enemy(Character):
-	def __init__(self, start_x, start_y, facing_direction):
+	def __init__(self, start_x, start_y, facing_direction, game_map):
 		Character.__init__(self, start_x, start_y, facing_direction)
 		self.colour = SILVER
 		self.triggered = False
+		self.path = []
+		self.game_map = game_map
 		enemies.append(self)
 
 	def die(self):
-		try:
-			self.radar.destroy()
-			enemies.remove(self)
-			allObjects.remove(self)
-			del self
-		except ValueError:
-			pass
+		self.radar.destroy()
+		enemies.remove(self)
+		allObjects.remove(self)
+		allCharacters.remove(self)
+		del self
 
 	def listen(self, pos_x, pos_y):
 		distance_x = math.fabs(self.rect.x - pos_x)
@@ -372,33 +383,16 @@ class Enemy(Character):
 
 	def follow(self):
 		#TODO: Stay triggered until the enemy reaches the target location
-		if (self.target_x - 5) <= self.rect.x <= (self.target_x + 5) and (self.target_y - 5) <= self.rect.y <= (self.target_y + 5):
-			self.triggered = False
+		if type(self.path) == 'NoneType' :
+			#TODO: Make the enemy follow all the steps in the path till it reaches destination
+			pass
 		else:
-			self.orient(self.target_x, self.target_y)
-			if not self.radar.blocked:
-				self.walk(self.facing_direction)
-				return
-			if self.rect.x > self.target_x:
-				self.facing_direction = Direction.LEFT
-				if not self.radar.blocked:
-					self.walk(self.facing_direction)
-					return
-			if self.rect.x < self.target_x:
-				self.facing_direction = Direction.RIGHT
-				if not self.radar.blocked:
-					self.walk(self.facing_direction)
-					return
-			if self.rect.y < self.target_y:
-				self.facing_direction = Direction.DOWN
-				if not self.radar.blocked:
-					self.walk(self.facing_direction)
-					return
-			if self.rect.y > self.target_y:
-				self.facing_direction = Direction.UP
-				if not self.radar.blocked:
-					self.walk(self.facing_direction)
-					return
+			self.path = self.findPath()
+
+	def findPath(self):
+		new_map = Grid(self.game_map)
+		new_map.addTarget(self.target_x, self.target_y)
+		return []
 
 
 class Wall(pygame.sprite.Sprite):
@@ -433,7 +427,7 @@ def message_to_screen(msg, colour, pos_x, pos_y, size):
 
 
 def gameLoop():
-	game_map = level1
+	game_map = list(level1)
 
 	gameExit = False
 	gameLost = False
@@ -452,15 +446,21 @@ def gameLoop():
 		clock.tick(FPS)
 
 		while gameRestart:
-
 			playerCountDown = CountDownClock()
 
-			for character in allCharacters:
-				character.die()
 			for wall in walls:
 				wall.destroy()
+			for character in allCharacters:
+				character.die()
 			for bullet in bullets:
 				bullet.destroy()
+
+			allObjects.clear()
+			walls.clear()
+			enemies.clear()
+			bullets.clear()
+			allCharacters.clear()
+			radars.clear()
 
 			#Create the Map
 			for i, row in enumerate(game_map):
@@ -470,50 +470,20 @@ def gameLoop():
 					if item == 2:
 						player = Player( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
 					if item == 3:
-						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT )
+						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.LEFT, copy.deepcopy(game_map) )
 					if item == 4:
-						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.RIGHT )
+						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.RIGHT, copy.deepcopy(game_map) )
 					if item == 5:
-						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.UP )
+						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.UP, copy.deepcopy(game_map) )
 					if item == 6:
-						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.DOWN )
+						Enemy( j*BLOCK_SIZE, i*BLOCK_SIZE, Direction.DOWN, copy.deepcopy(game_map) )
 
-			gameRestart = False
 			gameRunning = True
-
-
-		while gameLost:
-			for character in allCharacters:
-				character.die()
-			for wall in walls:
-				wall.destroy()
-			for bullet in bullets:
-				bullet.destroy()
-
-			gameDisplay.fill(WHITE)
-			message_to_screen("You Died! Press 'r' to restart level.", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
-			pygame.display.update()
-
-			for e in pygame.event.get():
-				if e.type == pygame.QUIT:
-					gameExit = True
-					gameLost = False
-				if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-					gameExit = True
-					gameLost = False
-				if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
-					gameLost = False
-					gameRestart = True
-
+			gameLost = False
+			gameWon = False
+			gameRestart = False
 
 		while gameWon:
-			for character in allCharacters:
-				character.die()
-			for wall in walls:
-				wall.destroy()
-			for bullet in bullets:
-				bullet.destroy()
-
 			gameDisplay.fill(WHITE)
 			message_to_screen("You won! Press 'n' for next level.", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
 			pygame.display.update()
@@ -529,21 +499,42 @@ def gameLoop():
 					if gameLevel1:
 						gameLevel1 = False
 						gameLevel2 = True
-						game_map = level2
+						game_map = list(level2)
 					elif gameLevel2:
 						gameLevel2 = False
 						gameLevel3 = True
-						game_map = level3
+						game_map = list(level3)
+					elif gameLevel3:
+						#gameLevel3 = False
+						#gameLevel3 = True
+						#game_map = level3
+						pass
+
 					gameRestart = True
+					gameRunning = False
+					gameLost = False
 					gameWon = False
 
+		while gameLost:
+			gameDisplay.fill(WHITE)
+			message_to_screen("You Died! Press 'r' to restart level.", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
+			pygame.display.update()
+
+			for e in pygame.event.get():
+				if e.type == pygame.QUIT:
+					gameExit = True
+					gameLost = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+					gameExit = True
+					gameLost = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
+					gameRestart = True
+					gameRunning = False
+					gameWon = False
+					gameLost = False
 
 		while gameRunning:
-
 			#Create the Backgound
-			gameDisplay.fill(WHITE)
-
-			#Clear Screen
 			gameDisplay.fill(WHITE)
 
 			if playerCountDown.clock_running:
@@ -561,8 +552,10 @@ def gameLoop():
 					for enemy in enemies:
 						enemy.shoot()
 				if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
-					gameRestart = True
+					gameLost = False
 					gameRunning = False
+					gameWon = False
+					gameRestart = True
 				if e.type == pygame.MOUSEBUTTONDOWN:
 					if not playerCountDown.clock_running:
 						player.shoot()
@@ -600,6 +593,8 @@ def gameLoop():
 				if enemy.radar.rect.colliderect(player.rect):
 					enemy.shoot()
 
+			#TODO: Add collision to avoid enemies walking through each other
+
 
 			#Check if any bullets hit a character
 			for bullet in bullets:
@@ -607,10 +602,12 @@ def gameLoop():
 					if bullet.is_collided_with(enemy):
 						bullet.destroy()
 						enemy.die()
-						break
 				if bullet.is_collided_with(player):
+					bullet.destroy()
 					player.die()
 					gameLost = True
+					gameWon = False
+					gameRestart = False
 					gameRunning = False
 
 			#Enemy following
@@ -620,6 +617,8 @@ def gameLoop():
 
 			#Check if all enemies are dead
 			if len(enemies) == 0:
+				gameLost = False
+				gameRestart = False
 				gameWon = True
 				gameRunning = False
 
