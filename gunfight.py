@@ -13,7 +13,7 @@ CHARACTER_SIZE = BLOCK_SIZE
 BULLET_SIZE = 5
 RADAR_WIDTH = 5
 RADAR_LENGTH = 3 * BLOCK_SIZE
-HEARING_RANGE = 9 * BLOCK_SIZE
+HEARING_RANGE = 15 * BLOCK_SIZE
 
 CHARACTER_SPEED = 10
 BULLET_SPEED = 40
@@ -119,19 +119,28 @@ class Direction(Enum):
 
 
 class Grid():
-	def __init__(self, start_map):
+	def __init__(self, start_map, start_x, start_y):
 		self.grid = start_map
+		self.start_x = start_x
+		self.start_y = start_y
 		self.clear_all_enemies()
+		self.addStartPos()
 
 	def clear_all_enemies(self):
 		for i, row in enumerate(self.grid):
 			for j, item in enumerate(row):
-				if item != 0 and item != 1 and item != 2:
+				if item != 0 and item != 1:
 					self.grid[i][j] = 0
 
+	def addStartPos(self):
+		coord_x = math.ceil(self.start_x / (DISPLAY_WIDTH/20))
+		coord_y = math.ceil(self.start_y / (DISPLAY_HEIGHT/15))
+		self.grid[coord_y][coord_x] = 3 # 3 will be the start
+
 	def addTarget(self, target_x, target_y):
-		pass
-		#player.rect.x == target_x and player.rect.y == target_y
+		coord_x = math.ceil(target_x / (DISPLAY_WIDTH/20))
+		coord_y = math.ceil(target_y / (DISPLAY_HEIGHT/15))
+		self.grid[coord_y][coord_x] = 2 # 2 will be the target
 
 
 class CountDownClock():
@@ -390,7 +399,7 @@ class Enemy(Character):
 			self.path = self.findPath()
 
 	def findPath(self):
-		new_map = Grid(self.game_map)
+		new_map = Grid(self.game_map, self.rect.x, self.rect.y)
 		new_map.addTarget(self.target_x, self.target_y)
 		return []
 
@@ -428,7 +437,6 @@ def message_to_screen(msg, colour, pos_x, pos_y, size):
 
 def gameLoop():
 	game_map = list(level1)
-
 	gameExit = False
 	gameLost = False
 	gameRestart = True
