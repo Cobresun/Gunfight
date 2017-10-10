@@ -95,6 +95,22 @@ level2 =   [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 level3 =   [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+			[1, 0, 0, 4, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1], 
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+level4 =   [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 1, 1, 1], 
@@ -237,7 +253,7 @@ class CountDownClock():
 
 	def act(self):
 		#print (pygame.time.get_ticks() - self.start_ticks)
-		if math.floor((pygame.time.get_ticks() - self.start_ticks)/1000)  == math.floor(self.milliseconds/1000):
+		if math.floor((pygame.time.get_ticks() - self.start_ticks)) >= math.floor(self.milliseconds):
 			self.restart()
 
 
@@ -473,8 +489,8 @@ class Enemy(Character):
 			self.target_y = pos_y
 
 	def follow(self):
+		#TODO: Make this actually work...
 		print ("Following!")
-		#TODO: Stay triggered until the enemy reaches the target location
 		if (self.target_x - 60) <= self.rect.x and (self.rect.x <= self.target_x + 60) and (
 			self.target_y - 60 <= self.rect.y) and (self.rect.y <= self.target_y + 60):
 			self.triggered = False
@@ -537,6 +553,7 @@ def gameLoop():
 	gameRestart = True
 	gameRunning = False
 	gameWon = False
+	gameOver = False
 
 	gameLevel1 = True
 	gameLevel2 = False
@@ -548,7 +565,7 @@ def gameLoop():
 
 		while gameRestart:
 			playerCountDown = CountDownClock(5000)
-			enemyFollowCountDown = CountDownClock(300)
+			enemyFollowCountDown = CountDownClock(400)
 
 			for wall in walls:
 				wall.destroy()
@@ -585,6 +602,19 @@ def gameLoop():
 			gameWon = False
 			gameRestart = False
 
+		while gameOver:
+			gameDisplay.fill(WHITE)
+			message_to_screen("You won! I didn't make any more levels!", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
+			pygame.display.update()
+			
+			for e in pygame.event.get():
+				if e.type == pygame.QUIT:
+					gameExit = True
+					gameOver = False
+				if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+					gameExit = True
+					gameOver = False
+
 		while gameWon:
 			gameDisplay.fill(WHITE)
 			message_to_screen("You won! Press 'n' for next level.", RED, DISPLAY_WIDTH/2, DISPLAY_HEIGHT/2, size=50)
@@ -607,10 +637,13 @@ def gameLoop():
 						gameLevel3 = True
 						game_map = list(level3)
 					elif gameLevel3:
-						#gameLevel3 = False
-						#gameLevel3 = True
-						#game_map = level3
-						pass
+						gameLevel3 = False
+						gameLevel4 = True
+						game_map = level4
+					elif gameLevel4:
+						gameLevel4 = False
+						gameOver = True
+						break
 
 					gameRestart = True
 					gameRunning = False
@@ -641,8 +674,7 @@ def gameLoop():
 
 			if playerCountDown.clock_running:
 				playerCountDown.act()
-			if enemyFollowCountDown.clock_running:
-				enemyFollowCountDown.act()
+			enemyFollowCountDown.act()
 
 			#Controller
 			for e in pygame.event.get():
