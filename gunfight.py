@@ -13,7 +13,7 @@ CHARACTER_SIZE = BLOCK_SIZE
 BULLET_SIZE = 5
 RADAR_WIDTH = 5
 RADAR_LENGTH = 3 * BLOCK_SIZE
-HEARING_RANGE = 15 * BLOCK_SIZE
+HEARING_RANGE = 8 * BLOCK_SIZE
 
 CHARACTER_SPEED = 10
 BULLET_SPEED = 40
@@ -46,7 +46,7 @@ allCharacters = []
 radars = []
 
 #Map
-level0 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+level0 =   [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
@@ -62,7 +62,7 @@ level0 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
-level1 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+level1 =   [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
@@ -78,7 +78,7 @@ level1 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
-level2 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+level2 =   [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
@@ -94,7 +94,7 @@ level2 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
-level3 = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
+level3 =   [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
 			[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
 			[1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 3, 0, 1, 1, 1], 
@@ -118,13 +118,29 @@ class Direction(Enum):
 	DOWN = 4
 
 
+def remove_duplicates(thing):
+	new_list = []
+	for item in thing:
+		if item not in new_list:
+			new_list.append(item)
+	return new_list
+
+
 class Grid():
 	def __init__(self, start_map, start_x, start_y):
 		self.grid = start_map
 		self.start_x = start_x
 		self.start_y = start_y
+		self.path = [1]
+		self.finalPath = []
 		self.clear_all_enemies()
 		self.addStartPos()
+
+	def getStartVertex(self):
+		return (self.startVertex_x, self.startVertex_y)
+
+	def getEndVertex(self):
+		return (self.endVector_x, self.endVector_y)
 
 	def clear_all_enemies(self):
 		for i, row in enumerate(self.grid):
@@ -135,18 +151,82 @@ class Grid():
 	def addStartPos(self):
 		coord_x = math.ceil(self.start_x / (DISPLAY_WIDTH/20))
 		coord_y = math.ceil(self.start_y / (DISPLAY_HEIGHT/15))
+		self.startVertex_x = coord_x
+		self.startVertex_y = coord_y
 		self.grid[coord_y][coord_x] = 3 # 3 will be the start
+		return (coord_x, coord_y)
 
 	def addTarget(self, target_x, target_y):
 		coord_x = math.ceil(target_x / (DISPLAY_WIDTH/20))
 		coord_y = math.ceil(target_y / (DISPLAY_HEIGHT/15))
+		self.endVector_x = coord_x
+		self.endVector_y = coord_y
 		self.grid[coord_y][coord_x] = 2 # 2 will be the target
+
+	def findPath(self, vertex, from_direction=Direction.LEFT, visited=[], path=[]):
+		visited = visited
+		path = path
+
+		if vertex not in path:
+			path.append(vertex)
+		if vertex not in visited:
+			visited.append(vertex)
+
+		if vertex == self.getEndVertex():
+			path = remove_duplicates(path)
+			self.finalPath = path
+			return path
+
+		check_up = True
+		check_down = True
+		check_left = True
+		check_right = True
+
+		if vertex[1] == 0:
+			check_up = False
+		if vertex[0] == 0:
+			check_left = False
+		if vertex[1] == 14:
+			check_down = False
+		if vertex[0] == 19:
+			check_right = False
+
+		if (not check_up and not check_right and not check_down):
+			path.pop(vertex)
+			return path
+		if (not check_right and not check_down and not check_left):
+			path.pop(vertex)
+			return path
+		if (not check_down and not check_left and not check_up):
+			path.pop(vertex)
+			return path
+
+		if check_up:
+			if ( self.grid[vertex[1] - 1][vertex[0]] ) != 1 and ( (vertex[0], vertex[1] - 1) not in visited):
+				self.findPath( (vertex[0], vertex[1] - 1), visited, path)
+
+		if check_right:
+			if ( self.grid[vertex[1]][vertex[0] + 1] ) != 1 and ( (vertex[0] + 1, vertex[1]) not in visited):
+				self.findPath( (vertex[0] + 1, vertex[1]), visited, path)
+
+		if check_down:
+			if ( self.grid[vertex[1] + 1][vertex[0]] ) != 1 and ( (vertex[0], vertex[1] + 1) not in visited):
+				self.findPath( (vertex[0], vertex[1] + 1), visited, path)
+
+		if check_left:
+			if ( self.grid[vertex[1]][vertex[0] - 1] ) != 1 and ( (vertex[0] - 1, vertex[1]) not in visited):
+				self.findPath( (vertex[0] - 1, vertex[1]), visited, path)
+
+		if len(path) > 0:
+			path.pop()
+		return path
 
 
 class CountDownClock():
 	#TODO: Pretty sure this doesn't always work, need to look into fixing this...
-	def __init__(self):
+	def __init__(self, milliseconds):
 		self.clock_running = False
+		self.milliseconds = milliseconds
 		self.start_ticks = pygame.time.get_ticks()
 
 	def restart(self):
@@ -156,7 +236,8 @@ class CountDownClock():
 		pygame.mixer.music.play()
 
 	def act(self):
-		if int((pygame.time.get_ticks() - self.start_ticks)/1000)  == 5:
+		#print (pygame.time.get_ticks() - self.start_ticks)
+		if math.floor((pygame.time.get_ticks() - self.start_ticks)/1000)  == math.floor(self.milliseconds/1000):
 			self.restart()
 
 
@@ -382,6 +463,7 @@ class Enemy(Character):
 		del self
 
 	def listen(self, pos_x, pos_y):
+		print ("Heard!")
 		distance_x = math.fabs(self.rect.x - pos_x)
 		distance_y = math.fabs(self.rect.y - pos_y)
 		displacement = math.sqrt((distance_x**2) + (distance_y**2))
@@ -391,17 +473,30 @@ class Enemy(Character):
 			self.target_y = pos_y
 
 	def follow(self):
+		print ("Following!")
 		#TODO: Stay triggered until the enemy reaches the target location
-		if type(self.path) == 'NoneType' :
-			#TODO: Make the enemy follow all the steps in the path till it reaches destination
-			pass
+		if (self.target_x - 60) <= self.rect.x and (self.rect.x <= self.target_x + 60) and (
+			self.target_y - 60 <= self.rect.y) and (self.rect.y <= self.target_y + 60):
+			self.triggered = False
+
+		if self.path != []:
+			next_coord = self.path[0]
+			del self.path[0]
+			self.orient(next_coord[0], next_coord[1])
+			print (next_coord)
+
+			self.rect.x = next_coord[0] * (DISPLAY_WIDTH/20)
+			self.rect.y = next_coord[1] * (DISPLAY_HEIGHT/15)
+
 		else:
 			self.path = self.findPath()
 
 	def findPath(self):
 		new_map = Grid(self.game_map, self.rect.x, self.rect.y)
 		new_map.addTarget(self.target_x, self.target_y)
-		return []
+		start_vertex = new_map.getStartVertex()
+		new_map.findPath(vertex=start_vertex)
+		return new_map.finalPath
 
 
 class Wall(pygame.sprite.Sprite):
@@ -447,14 +542,13 @@ def gameLoop():
 	gameLevel2 = False
 	gameLevel3 = False
 
-	playerCountDown = CountDownClock()
-
 	#Main Loop
 	while not gameExit:
 		clock.tick(FPS)
 
 		while gameRestart:
-			playerCountDown = CountDownClock()
+			playerCountDown = CountDownClock(5000)
+			enemyFollowCountDown = CountDownClock(300)
 
 			for wall in walls:
 				wall.destroy()
@@ -547,6 +641,8 @@ def gameLoop():
 
 			if playerCountDown.clock_running:
 				playerCountDown.act()
+			if enemyFollowCountDown.clock_running:
+				enemyFollowCountDown.act()
 
 			#Controller
 			for e in pygame.event.get():
@@ -621,7 +717,9 @@ def gameLoop():
 			#Enemy following
 			for enemy in enemies:
 				if enemy.triggered:
-					enemy.follow()
+					if not enemyFollowCountDown.clock_running:
+						enemyFollowCountDown.clock_running = True
+						enemy.follow()
 
 			#Check if all enemies are dead
 			if len(enemies) == 0:
